@@ -1,0 +1,113 @@
+/**
+ * about.css
+ */
+
+.about { background: var(--clr-bg-surface); }
+
+.about__grid {
+    display:               grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap:                   var(--space-16);
+    align-items:           start;
+}
+
+.about__visual { position: relative; }
+
+.about__img-frame {
+    position:      relative;
+    border-radius: var(--radius-lg);
+    overflow:      hidden;
+    border:        1px solid var(--clr-border);
+    background:    var(--clr-bg-card);
+    aspect-ratio:  3/4;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+}
+
+.about__img-frame::after {
+    content:   '';
+    position:  absolute;
+    inset:     0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(8,11,18,0.8));
+}
+
+.about__img-placeholder {
+    font-family:  var(--font-display);
+    font-size:    var(--text-5xl);
+    font-weight:  var(--weight-extrabold);
+    color:        var(--clr-accent);
+    opacity:      0.3;
+}
+
+.about__badge {
+    position:      absolute;
+    bottom:        -1rem;
+    right:         -1rem;
+    background:    var(--clr-bg-elevated);
+    border:        1px solid var(--clr-border-bright);
+    border-radius: var(--radius-lg);
+    padding:       var(--space-4);
+    text-align:    center;
+    z-index:       1;
+}
+
+.about__badge-num {
+    font-family: var(--font-display);
+    font-size:   var(--text-3xl);
+    font-weight: var(--weight-extrabold);
+    color:       var(--clr-accent);
+}
+
+.about__badge-label {
+    font-size: var(--text-xs);
+    color:     var(--clr-text-muted);
+    display:   block;
+}
+
+.about__content {}
+
+.about__bio {
+    font-size:    var(--text-lg);
+    color:        var(--clr-text-secondary);
+    line-height:  var(--leading-relaxed);
+    margin-bottom: var(--space-6);
+}
+
+.about__bio strong {
+    color:       var(--clr-text-primary);
+    font-weight: var(--weight-semibold);
+}
+
+.about__values {
+    display:               grid;
+    grid-template-columns: 1fr 1fr;
+    gap:                   var(--space-4);
+    margin-bottom:         var(--space-8);
+}
+
+.about__value {
+    padding:       var(--space-4);
+    background:    var(--clr-bg-card);
+    border:        1px solid var(--clr-border);
+    border-radius: var(--radius-md);
+    border-left:   3px solid var(--clr-accent);
+}
+
+.about__value-title {
+    font-family:   var(--font-display);
+    font-size:     var(--text-sm);
+    font-weight:   var(--weight-semibold);
+    margin-bottom: var(--space-1);
+}
+
+.about__value-desc {
+    font-size:  var(--text-xs);
+    color:      var(--clr-text-muted);
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .about__grid { grid-template-columns: 1fr; }
+    .about__values { grid-template-columns: 1fr; }
+}
