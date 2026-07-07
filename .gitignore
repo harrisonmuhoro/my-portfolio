@@ -1,0 +1,43 @@
+# ─── ENVIRONMENT & CONFIG ───────────────────────────────────
+.env
+.env.*
+!.env.example
+config/config.php
+
+# ─── PHP ────────────────────────────────────────────────────
+vendor/
+composer.lock
+
+# ─── LOGS & CACHE ───────────────────────────────────────────
+*.log
+logs/
+cache/
+tmp/
+temp/
+
+# ─── UPLOADS (user-generated content) ───────────────────────
+uploads/
+storage/
+
+# ─── OS JUNK ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── EDITORS ────────────────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ─── WAMP / LOCAL DEV ARTIFACTS ─────────────────────────────
+*.bak
+*.sql
+*.sqlite
+*.db
+
+# ─── NODE (if you ever add a build step) ────────────────────
+node_modules/
+dist/
+.npm
+EOF

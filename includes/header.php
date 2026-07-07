@@ -50,22 +50,34 @@ $base = rtrim(BASE_PATH, '/');
     <!-- ── Favicon ── -->
     <link rel="icon" type="image/svg+xml"  href="<?= $base ?>/assets/icons/favicon.svg">
     <link rel="apple-touch-icon"           href="<?= $base ?>/assets/icons/apple-touch-icon.png">
-    <meta name="theme-color" content="#0a0d14">
+    <meta name="theme-color" content="#0A1628">
 
-    <!-- ── Fonts (with performance best practices) ── -->
+    <!-- ── Fonts ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload"
-          href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap"
-          as="style"
-          onload="this.onload=null;this.rel='stylesheet'">
-    <noscript>
-        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-    </noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-    <!-- ── Global Styles ── -->
+    <!-- ── Theme Persistence ── -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+            if (savedTheme === 'light' || (!savedTheme && prefersLight)) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- ── CSS Delivery ── -->
     <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css">
     <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css">
+
+    <?php if (!empty($page_css) && is_array($page_css)): ?>
+        <?php foreach ($page_css as $css_file): ?>
+            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css">
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <!-- ── JSON-LD Structured Data ── -->
     <script type="application/ld+json">
@@ -80,7 +92,7 @@ $base = rtrim(BASE_PATH, '/');
         "telephone": <?= json_encode(PHONE_PRIMARY) ?>,
         "address": {
             "@type": "PostalAddress",
-            "addressLocality": "Nairobi",
+            "addressLocality": "Nyeri",
             "addressCountry": "KE"
         },
         "sameAs": <?= json_encode(array_values(SOCIAL_LINKS)) ?>,
@@ -89,4 +101,5 @@ $base = rtrim(BASE_PATH, '/');
     </script>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <?php require_once __DIR__ . '/navigation.php'; ?>

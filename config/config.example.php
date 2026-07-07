@@ -1,59 +1,45 @@
 <?php
-/**
- * Central Configuration File
- * Harrison Muhoro — Developer Portfolio
- * All constants defined here. No hardcoded values in pages.
- */
 
-// ─── ENVIRONMENT ──────────────────────────────────────────
-define('ENVIRONMENT', 'development'); // 'production' | 'development'
+$_is_local = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']);
+define('ENVIRONMENT', $_is_local ? 'development' : 'production');
 define('DEBUG_MODE', ENVIRONMENT === 'development');
 
-// ─── BASE PATH (WAMP-compatible) ──────────────────────────
-// Auto-detects whether running at root or in a subdirectory
-// e.g. localhost/harrison → BASE_PATH = '/harrison'
-// e.g. localhost/         → BASE_PATH = ''
 if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', dirname(__DIR__) === dirname(dirname(__DIR__))
         ? __DIR__ . '/..'
         : realpath(__DIR__ . '/..'));
 }
 
-// Detect base path from script location relative to doc root
-$_doc_root   = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
-$_proj_root  = rtrim(str_replace('\\', '/', realpath(__DIR__ . '/..')), '/');
+$_doc_root   = rtrim(str_replace(['\\', '//'], '/', $_SERVER['DOCUMENT_ROOT'] ?? ''), '/');
+$_proj_root  = rtrim(str_replace(['\\', '//'], '/', realpath(__DIR__ . '/..')), '/');
 $_base_path  = str_replace($_doc_root, '', $_proj_root);
 define('BASE_PATH', rtrim($_base_path, '/'));   // e.g. '/harrison' or ''
-define('BASE_URL',  'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . BASE_PATH);
+define('BASE_URL',  (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'localhost') . BASE_PATH);
 unset($_doc_root, $_proj_root, $_base_path);
 
-// ─── SITE IDENTITY ────────────────────────────────────────
 define('SITE_NAME', 'Harrison Muhoro');
 define('SITE_TAGLINE', 'Building Systems That Work. Delivering Solutions That Scale.');
-define('SITE_DESCRIPTION', 'Harrison Muhoro is a Web Developer and Full-Stack Developer in Training based in Kenya, specializing in PHP, MySQL, and business-focused web systems for corporate, institutional, and government clients.');
-define('SITE_URL', ENVIRONMENT === 'development' ? BASE_URL : 'https://harrisonmuhoro.dev');
+define('SITE_DESCRIPTION', 'Harrison Muhoro is a software engineer in Kenya who builds production-ready enterprise systems—backend architecture, performant web applications, and maintainable software for healthcare, operations, and business teams.');
+define('SITE_URL', BASE_URL); 
 define('SITE_VERSION', '1.0.0');
 define('SITE_LANGUAGE', 'en-KE');
 define('SITE_LOCALE', 'en_KE');
 
-// ─── PERSONAL DETAILS ─────────────────────────────────────
 define('OWNER_NAME', 'Harrison Muhoro');
 define('OWNER_FIRST_NAME', 'Harrison');
-define('PRIMARY_TITLE', 'Web Developer');
-define('SECONDARY_TITLE', 'Full-Stack Developer in Training');
+define('PRIMARY_TITLE', 'Software Engineer');
+define('SECONDARY_TITLE', 'Enterprise Systems & Full-Stack Engineer');
 define('LOCATION', 'Nyeri, Kenya');
 
-// ─── CONTACT INFORMATION ──────────────────────────────────
-define('EMAIL_ADDRESS', 'zionh191@gmail.com');
-define('PHONE_PRIMARY', '+254 726 300 091');
-define('PHONE_SECONDARY', '+254 105 628 524');
-define('WHATSAPP_NUMBER', '254726300091');
+define('EMAIL_ADDRESS', 'your@email.com');
+define('PHONE_PRIMARY', '+254 700 000 000');
+define('PHONE_SECONDARY', '+254 700 000 000');
+define('WHATSAPP_NUMBER', '254700000000');
 define('WHATSAPP_MESSAGE', 'Hello%20Harrison,%20I%20found%20your%20portfolio%20and%20I%20am%20interested%20in%20your%20web%20development%20services.%20Please%20get%20back%20to%20me.');
 define('WHATSAPP_LINK', 'https://wa.me/' . WHATSAPP_NUMBER . '?text=' . WHATSAPP_MESSAGE);
 
-// ─── SOCIAL LINKS ─────────────────────────────────────────
 define('SOCIAL_LINKS', [
-    'github'   => 'https://github.com/Ziha546',
+    'github'   => 'https://github.com/harrisonmuhoro',
     'linkedin' => 'https://linkedin.com/in/zion-harrison',
     'facebook' => 'https://www.facebook.com/harrison.muhoro.1',
     'whatsapp' => WHATSAPP_LINK,
@@ -65,13 +51,13 @@ define('CV_PATH', SITE_URL . '/assets/docs/harrison-muhoro-cv.pdf');
 
 // ─── DATABASE ─────────────────────────────────────────────
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'portfolio_db');
-define('DB_USER', 'portfolio_user');
-define('DB_PASS', '');   // Set via environment variable in production
+define('DB_USER', 'your_db_user');
+define('DB_NAME', 'your_db_name');
+define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
 // ─── SEO CONSTANTS ────────────────────────────────────────
-define('SEO_KEYWORDS', 'Web Developer Kenya, PHP Developer Kenya, Full-Stack Developer Kenya, Website Developer Nyeri, Business System Developer Kenya, Harrison Muhoro, Web Development Nairobi, Corporate Web Developer Kenya');
+define('SEO_KEYWORDS', 'Web Developer Kenya, PHP Developer Kenya, Full-Stack Developer Kenya, Website Developer Nyeri, Business System Developer Kenya, Harrison Muhoro, Web Development Nyeri, Corporate Web Developer Kenya');
 define('SEO_AUTHOR', OWNER_NAME);
 define('SEO_ROBOTS', 'index, follow');
 define('OG_IMAGE', SITE_URL . '/assets/images/og-image.jpg');
@@ -91,6 +77,7 @@ if (DEBUG_MODE) {
     error_reporting(0);
     ini_set('display_errors', 0);
     ini_set('log_errors', 1);
+    ini_set('expose_php', 0);  // Hide X-Powered-By header in production
 }
 
 // ─── TIMEZONE ─────────────────────────────────────────────

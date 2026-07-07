@@ -1,0 +1,112 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2016 >>
+stream
+BT
+1 0 0 1 56 786 Tm
+/F2 22 Tf
+(Harrison Muhoro) Tj
+1 0 0 1 56 760 Tm
+/F1 12 Tf
+(Software Engineer  |  Enterprise Systems & Full-Stack) Tj
+1 0 0 1 56 740 Tm
+/F1 10 Tf
+(Nyeri, Kenya  ·  zionh191@gmail.com  ·  +254 726 300 091) Tj
+1 0 0 1 56 726 Tm
+/F1 10 Tf
+(github.com/harrisonmuhoro  ·  linkedin.com/in/zion-harrison) Tj
+1 0 0 1 56 700 Tm
+/F2 13 Tf
+(PROFILE) Tj
+1 0 0 1 56 682 Tm
+/F1 10.5 Tf
+(Software engineer building production-ready enterprise systems: backend) Tj
+1 0 0 1 56 668 Tm
+/F1 10.5 Tf
+(architecture, performant web applications, and maintainable software for) Tj
+1 0 0 1 56 654 Tm
+/F1 10.5 Tf
+(healthcare, operations, and business teams across Africa.) Tj
+1 0 0 1 56 628 Tm
+/F2 13 Tf
+(CORE SKILLS) Tj
+1 0 0 1 56 610 Tm
+/F1 10.5 Tf
+(Backend:   PHP, Laravel, Node.js, REST APIs) Tj
+1 0 0 1 56 596 Tm
+/F1 10.5 Tf
+(Frontend:  React, TypeScript, HTML5, CSS3) Tj
+1 0 0 1 56 582 Tm
+/F1 10.5 Tf
+(Database:  MySQL, PostgreSQL, MongoDB) Tj
+1 0 0 1 56 568 Tm
+/F1 10.5 Tf
+(Cloud/Ops: Microsoft Azure, Docker, CI/CD, Nginx) Tj
+1 0 0 1 56 554 Tm
+/F1 10.5 Tf
+(Tools:     Git, GitHub, VS Code, Postman) Tj
+1 0 0 1 56 528 Tm
+/F2 13 Tf
+(SELECTED PROJECTS) Tj
+1 0 0 1 56 510 Tm
+/F2 11 Tf
+(Afya HMS - Hospital Management System) Tj
+1 0 0 1 56 495 Tm
+/F1 10 Tf
+(Role-aware system centralizing patient records, billing, queues, and) Tj
+1 0 0 1 56 482 Tm
+/F1 10 Tf
+(department handoffs.  Stack: PHP, Laravel, React, MySQL.) Tj
+1 0 0 1 56 462 Tm
+/F2 11 Tf
+(KenAI - NLP Analytics Platform) Tj
+1 0 0 1 56 447 Tm
+/F1 10 Tf
+(Dashboard turning unstructured Swahili text into structured insights via) Tj
+1 0 0 1 56 434 Tm
+/F1 10 Tf
+(replaceable ML services.  Stack: TypeScript, Node.js, Python, Redis.) Tj
+1 0 0 1 56 414 Tm
+/F2 11 Tf
+(Student Internship Portal) Tj
+1 0 0 1 56 399 Tm
+/F1 10 Tf
+(Centralized, role-based application management replacing manual tracking.) Tj
+1 0 0 1 56 386 Tm
+/F1 10 Tf
+(Stack: HTML, CSS, JavaScript, PHP.) Tj
+1 0 0 1 56 360 Tm
+/F1 10 Tf
+(Full portfolio and case studies: harrison.wasmer.app) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000002319 00000 n 
+0000002389 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2464
+%%EOF

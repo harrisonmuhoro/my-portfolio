@@ -1,5 +1,5 @@
 /**
- * navigation.js — Sticky nav, mobile menu, active link
+ * navigation.js — Navbar behavior & Theme Toggle
  */
 (function () {
     'use strict';
@@ -7,74 +7,76 @@
     const header    = document.getElementById('nav-header');
     const hamburger = document.getElementById('nav-hamburger');
     const mobileMenu= document.getElementById('mobile-menu');
+    const navLinks  = document.querySelectorAll('.nav-link, .nav-mobile__link');
+    const themeToggles = document.querySelectorAll('.theme-toggle');
 
-    if (!header) return;
-
-    // ── Scrolled state ─────────────────────────────────────
-    const SCROLL_THRESHOLD = 60;
-
-    function onScroll() {
-        const scrolled = window.scrollY > SCROLL_THRESHOLD;
-        header.classList.toggle('is-scrolled', scrolled);
+    // ── Scroll styling ─────────────────────────────
+    function handleScroll() {
+        if (window.scrollY > 50) {
+            header.classList.add('is-scrolled');
+        } else {
+            header.classList.remove('is-scrolled');
+        }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Run on load
 
-    // ── Mobile menu ────────────────────────────────────────
-    function openMenu() {
-        hamburger.classList.add('is-open');
-        hamburger.setAttribute('aria-expanded', 'true');
-        mobileMenu.classList.add('is-open');
-        mobileMenu.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
+    // ── Mobile Menu Toggle ──────────────────────────
+    function toggleMobileMenu() {
+        const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
+        hamburger.setAttribute('aria-expanded', !isExpanded);
+        mobileMenu.classList.toggle('is-open');
+        mobileMenu.setAttribute('aria-hidden', isExpanded);
+        document.body.style.overflow = isExpanded ? '' : 'hidden'; // Prevent scrolling
     }
 
-    function closeMenu() {
-        hamburger.classList.remove('is-open');
-        hamburger.setAttribute('aria-expanded', 'false');
-        mobileMenu.classList.remove('is-open');
-        mobileMenu.setAttribute('aria-hidden', 'true');
-        document.body.style.overflow = '';
+    if (hamburger) {
+        hamburger.addEventListener('click', toggleMobileMenu);
     }
 
-    hamburger.addEventListener('click', function () {
-        const isOpen = mobileMenu.classList.contains('is-open');
-        isOpen ? closeMenu() : openMenu();
-    });
-
-    // Close on link click
-    mobileMenu.querySelectorAll('.nav-mobile__link').forEach(function (link) {
-        link.addEventListener('click', closeMenu);
-        link.setAttribute('tabindex', '0');
-    });
-
-    // Close on outside click
-    document.addEventListener('click', function (e) {
-        if (mobileMenu.classList.contains('is-open') &&
-            !header.contains(e.target)) {
-            closeMenu();
+    // Close menu when clicking a mobile link
+    navLinks.forEach(function (link) {
+        if (link.classList.contains('nav-mobile__link')) {
+            link.addEventListener('click', function () {
+                if (mobileMenu.classList.contains('is-open')) {
+                    toggleMobileMenu();
+                }
+            });
         }
     });
 
-    // Close on Escape
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
-            closeMenu();
-        }
+    // ── Smooth Scroll & Active Link ──────────────────────────
+    // Since we're using anchor links for the homepage
+    navLinks.forEach(function (anchor) {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href.includes('#')) {
+                const hashIndex = href.indexOf('#');
+                const hash = href.substring(hashIndex);
+                
+                // If we are already on the homepage (or the page with the anchor)
+                if (window.location.pathname === '/' || window.location.pathname === '/harrison-portfolio/') {
+                    const target = document.querySelector(hash);
+                    if (target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                        history.pushState(null, null, hash);
+                    }
+                }
+            }
+        });
     });
 
-    // ── Active nav link on scroll ──────────────────────────
-    const sections  = document.querySelectorAll('section[id]');
-    const navLinks  = document.querySelectorAll('.nav-link');
-
+    // Active link based on scroll position
+    const sections = document.querySelectorAll('section[id]');
     const observer = new IntersectionObserver(
         function (entries) {
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
                     navLinks.forEach(function (link) {
                         link.classList.remove('is-active');
-                        if (link.getAttribute('href') === '/#' + entry.target.id) {
+                        if (link.getAttribute('href').includes('#' + entry.target.id)) {
                             link.classList.add('is-active');
                         }
                     });
@@ -83,6 +85,19 @@
         },
         { rootMargin: '-40% 0px -55% 0px' }
     );
-
     sections.forEach(function (s) { observer.observe(s); });
+
+
+    // ── Theme Toggle ───────────────────────────────
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
+
+    themeToggles.forEach(toggle => {
+        toggle.addEventListener('click', toggleTheme);
+    });
+
 })();

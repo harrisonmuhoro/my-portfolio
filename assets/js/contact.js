@@ -1,5 +1,5 @@
 /**
- * contact.js — Form validation & AJAX submission
+ * contact.js — Form validation and async submission
  */
 (function () {
     'use strict';
@@ -7,125 +7,119 @@
     const form      = document.getElementById('contact-form');
     if (!form) return;
 
-    const submitBtn  = document.getElementById('form-submit');
-    const submitLabel= document.getElementById('submit-label');
-    const successBox = document.getElementById('form-success');
-    const errorBox   = document.getElementById('form-error');
-    const errorText  = document.getElementById('form-error-text');
+    const submitBtn   = document.getElementById('form-submit');
+    const submitLabel = document.getElementById('submit-label');
+    const successEl   = document.getElementById('form-success');
+    const errorEl     = document.getElementById('form-error');
+    const errorText   = document.getElementById('form-error-text');
 
-    // ── Validators ─────────────────────────────────────────
-    const validators = {
-        name:         { min: 2, max: 100, msg: 'Name must be 2–100 characters.' },
-        email:        { regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, msg: 'Please enter a valid email address.' },
-        project_type: { required: true, msg: 'Please select a project type.' },
-        subject:      { min: 5, max: 150, msg: 'Subject must be 5–150 characters.' },
-        message:      { min: 20, max: 3000, msg: 'Message must be 20–3000 characters.' },
-    };
-
-    function getGroup(fieldName) {
-        return document.getElementById('group-' + fieldName) ||
-               document.getElementById('group-type');
+    // ── Validation helpers ──────────────────────
+    function showError(groupId, message) {
+        const group = document.getElementById(groupId);
+        if (!group) return;
+        const errEl = group.querySelector('.form-error');
+        const input = group.querySelector('.form-input');
+        if (errEl) errEl.textContent = message;
+        if (input) input.setAttribute('aria-invalid', 'true');
+        group.classList.add('has-error');
     }
 
-    function getError(fieldName) {
-        return document.getElementById('error-' + fieldName) ||
-               document.getElementById('error-type');
+    function clearError(groupId) {
+        const group = document.getElementById(groupId);
+        if (!group) return;
+        const errEl = group.querySelector('.form-error');
+        const input = group.querySelector('.form-input');
+        if (errEl) errEl.textContent = '';
+        if (input) input.removeAttribute('aria-invalid');
+        group.classList.remove('has-error');
     }
 
-    function setError(fieldName, show) {
-        const group = getGroup(fieldName);
-        const errEl = getError(fieldName);
-        if (group) group.classList.toggle('has-error', show);
-        if (errEl) errEl.style.display = show ? 'block' : 'none';
-    }
-
-    function validateField(name, value) {
-        const rule = validators[name];
-        if (!rule) return true;
-
-        if (rule.required && !value.trim()) { setError(name, true); return false; }
-        if (rule.regex && !rule.regex.test(value.trim())) { setError(name, true); return false; }
-        if (rule.min && value.trim().length < rule.min) { setError(name, true); return false; }
-        if (rule.max && value.trim().length > rule.max) { setError(name, true); return false; }
-
-        setError(name, false);
-        return true;
-    }
-
-    function validateAll() {
+    function validateForm() {
         let valid = true;
-        ['name', 'email', 'project_type', 'subject', 'message'].forEach(function (f) {
-            const el = form.querySelector('[name="' + f + '"]');
-            if (el && !validateField(f, el.value)) valid = false;
-        });
+
+        const name    = document.getElementById('name');
+        const email   = document.getElementById('email');
+        const subject = document.getElementById('subject');
+        const message = document.getElementById('message');
+
+        clearError('group-name');
+        clearError('group-email');
+        clearError('group-subject');
+        clearError('group-message');
+
+        if (!name || name.value.trim().length < 2) {
+            showError('group-name', 'Please enter your name.');
+            valid = false;
+        }
+
+        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRe.test(email.value.trim())) {
+            showError('group-email', 'Please enter a valid email address.');
+            valid = false;
+        }
+
+        if (!subject || subject.value.trim().length < 5) {
+            showError('group-subject', 'Please enter a subject (min 5 characters).');
+            valid = false;
+        }
+
+        if (!message || message.value.trim().length < 20) {
+            showError('group-message', 'Please write a message (min 20 characters).');
+            valid = false;
+        }
+
         return valid;
     }
 
-    // Live validation
-    form.querySelectorAll('input, select, textarea').forEach(function (el) {
-        ['blur', 'change'].forEach(function (ev) {
-            el.addEventListener(ev, function () {
-                validateField(el.name, el.value);
-            });
-        });
+    // ── Live validation on blur ─────────────────
+    ['name', 'email', 'subject', 'message'].forEach(function (fieldId) {
+        const el = document.getElementById(fieldId);
+        if (el) {
+            el.addEventListener('blur', function () { validateForm(); });
+        }
     });
 
-    // ── Submit ─────────────────────────────────────────────
-    function setLoading(loading) {
-        submitBtn.disabled = loading;
-        submitLabel.textContent = loading ? 'Sending...' : 'Send Message';
-        submitBtn.style.opacity = loading ? '0.7' : '1';
-    }
-
-    function showFeedback(type) {
-        successBox.style.display = 'none';
-        errorBox.style.display   = 'none';
-        if (type === 'success') successBox.style.display = 'flex';
-        if (type === 'error')   errorBox.style.display   = 'flex';
-    }
-
+    // ── Submit ──────────────────────────────────
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        if (!validateAll()) {
-            // Scroll to first error
-            const firstError = form.querySelector('.has-error');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            return;
-        }
+        if (!validateForm()) return;
 
-        setLoading(true);
-        showFeedback(null);
+        // Hide previous feedback
+        if (successEl) successEl.hidden = true;
+        if (errorEl)   errorEl.hidden   = true;
 
-        const formData = new FormData(form);
+        // Loading state
+        if (submitBtn) submitBtn.disabled  = true;
+        if (submitLabel) submitLabel.textContent = 'Sending…';
+
+        const data = new FormData(form);
 
         fetch(form.action, {
-            method:  'POST',
-            body:    formData,
+            method: 'POST',
+            body:   data,
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         })
-        .then(function (response) {
-            return response.json();
+        .then(function (res) {
+            if (!res.ok) throw new Error('Server error: ' + res.status);
+            return res.json();
         })
-        .then(function (data) {
-            setLoading(false);
-            if (data.success) {
+        .then(function (json) {
+            if (json.success) {
+                if (successEl) successEl.hidden = false;
                 form.reset();
-                showFeedback('success');
-                successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             } else {
-                if (errorText) errorText.textContent = data.message || 'Something went wrong.';
-                showFeedback('error');
+                throw new Error(json.message || 'Unexpected error.');
             }
         })
-        .catch(function () {
-            setLoading(false);
-            if (errorText) {
-                errorText.textContent = 'Network error. Please check your connection and try again.';
-            }
-            showFeedback('error');
+        .catch(function (err) {
+            if (errorEl)  errorEl.hidden = false;
+            if (errorText) errorText.textContent = err.message || 'Something went wrong. Please contact me directly.';
+        })
+        .finally(function () {
+            if (submitBtn)  submitBtn.disabled = false;
+            if (submitLabel) submitLabel.textContent = 'Send Message';
         });
     });
+
 })();

@@ -140,15 +140,21 @@ $email_body .= str_repeat('─', 50) . "\n";
 $email_body .= "Reply directly to: " . $email . "\n";
 
 // ── Headers — prevent injection by using sanitized values ────
+// Use a domain-relative From address to improve deliverability
+$host         = $_SERVER['HTTP_HOST'] ?? 'harrison.wasmer.app';
+$from_email   = 'no-reply@' . $host;
 $from_name    = preg_replace('/[^a-zA-Z0-9 \-_]/', '', $name);
-$headers      = "From: Portfolio Contact <" . EMAIL_ADDRESS . ">\r\n";
-$headers     .= "Reply-To: " . $from_name . " <" . $email . ">\r\n";
-$headers     .= "X-Mailer: PHP/" . phpversion() . "\r\n";
-$headers     .= "MIME-Version: 1.0\r\n";
-$headers     .= "Content-Type: text/plain; charset=UTF-8\r\n";
+
+$headers   = [];
+$headers[] = "From: Portfolio Contact <" . $from_email . ">";
+$headers[] = "Reply-To: " . $from_name . " <" . $email . ">";
+$headers[] = "X-Mailer: PHP/" . phpversion();
+$headers[] = "MIME-Version: 1.0";
+$headers[] = "Content-Type: text/plain; charset=UTF-8";
 
 // ── Send email ───────────────────────────────────────────────
-$sent = mail(EMAIL_ADDRESS, $email_subject, $email_body, $headers);
+// We use the -f flag to set the envelope sender, which helps avoid spam filters
+$sent = mail(EMAIL_ADDRESS, $email_subject, $email_body, implode("\r\n", $headers), "-f" . $from_email);
 
 if ($sent) {
     // Increment rate limit counter
@@ -163,5 +169,7 @@ if ($sent) {
     if (ENVIRONMENT === 'production') {
         error_log('[ContactHandler] mail() failed for: ' . $email . ' at ' . date('Y-m-d H:i:s'));
     }
-    json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 500);
+    // Return a 200 with success:false instead of a 500 to avoid scary browser console errors
+    // but clearly indicate failure to the user.
+    json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 200);
 }
