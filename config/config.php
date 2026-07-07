@@ -63,7 +63,7 @@ define('EMAIL_ADDRESS',    getenv('CONTACT_EMAIL')   ?: 'zionh191@gmail.com');
 define('PHONE_PRIMARY',    '+254 726 300 091');
 define('PHONE_SECONDARY',  '+254 105 628 524');
 define('WHATSAPP_NUMBER',  '254726300091');
-define('WHATSAPP_MESSAGE', 'Hello%20Harrison,%20I%20found%20your%20portfolio%20and%20I%20am%20interested%20in%20your%20web%20development%20services.%20Please%20get%20back%20to%20me.');
+define('WHATSAPP_MESSAGE', 'Hello%20Harrison,%20I%20found%20your%20portfolio%20and%20I%20am%20interested%20in%20your%20web%20development%20services, system%20development%20services, and%20I%20would%20like%20to%20work%20with%20you .%20Please%20get%20back%20to%20me.');
 define('WHATSAPP_LINK',    'https://wa.me/' . WHATSAPP_NUMBER . '?text=' . WHATSAPP_MESSAGE);
 
 define('SOCIAL_LINKS', [
