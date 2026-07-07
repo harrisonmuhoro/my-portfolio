@@ -1,7 +1,5 @@
 <?php
-/**
- * pages/services.php — Redesigned
- */
+
 $page_css = ['services'];
 require_once __DIR__ . '/../includes/header.php';
 

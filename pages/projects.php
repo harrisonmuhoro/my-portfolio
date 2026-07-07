@@ -1,7 +1,5 @@
 <?php
-/**
- * pages/projects.php
- */
+
 $page_css = ['projects'];
 require_once __DIR__ . '/../includes/header.php';
 // Header includes navigation.php

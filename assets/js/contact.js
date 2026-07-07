@@ -1,6 +1,3 @@
-/**
- * contact.js — Form validation and async submission
- */
 (function () {
     'use strict';
 

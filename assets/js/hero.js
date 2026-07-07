@@ -1,6 +1,3 @@
-/**
- * hero.js — Hero section interactions
- */
 (function () {
     'use strict';
 

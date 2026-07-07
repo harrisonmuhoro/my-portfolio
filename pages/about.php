@@ -1,10 +1,7 @@
 <?php
-/**
- * pages/about.php — Redesigned: concise bio + icon-based stack + no timelines
- */
+
 $page_css = ['about'];
 require_once __DIR__ . '/../includes/header.php';
-// navigation.php is included at the bottom of header.php
 
 $stack_categories = [
     [

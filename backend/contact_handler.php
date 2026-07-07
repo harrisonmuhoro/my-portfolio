@@ -1,10 +1,4 @@
 <?php
-/**
- * backend/contact_handler.php
- * Secure PHP contact form handler — no frameworks
- * Protections: CSRF, honeypot, rate limiting, XSS, email injection, SQL injection
- */
-
 require_once __DIR__ . '/../config/config.php';
 
 // ── Response helper ─────────────────────────────────────────

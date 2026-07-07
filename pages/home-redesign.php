@@ -1,8 +1,4 @@
 <?php
-/**
- * pages/home-redesign.php
- * Production portfolio landing page aligned to the requested IA.
- */
 $page_css = ['home'];
 require_once __DIR__ . '/../includes/header.php';
 

@@ -1,15 +1,4 @@
 <?php
-/**
- * Security Headers Middleware
- * Harrison Muhoro — Developer Portfolio
- *
- * Sends all security headers via PHP header() calls.
- * Required because Wasmer Edge does not use Apache, so .htaccess
- * mod_headers directives are silently ignored.
- *
- * MUST be required BEFORE any output (before session_start, before HTML).
- */
-
 // Prevent direct access
 if (!defined('PROJECT_ROOT')) {
     http_response_code(403);
@@ -24,20 +13,19 @@ if (!headers_sent()) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
 
     // ── 2. Content-Security-Policy (CSP) ──────────────────────
-    // Whitelist approach — block everything not explicitly allowed
-    $csp_directives = [
+       $csp_directives = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'",                                // Theme persistence inline script
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",  // Google Fonts CSS
-        "font-src 'self' https://fonts.gstatic.com",                      // Google Fonts files
-        "img-src 'self' data: https:",                                    // Own images + data URIs + HTTPS images
-        "connect-src 'self'",                                             // Restrict fetch/XHR to same origin
-        "frame-src 'none'",                                               // No iframes allowed
-        "object-src 'none'",                                              // No plugins (Flash, Java, etc.)
-        "base-uri 'self'",                                                // Prevent base tag hijacking
-        "form-action 'self'",                                             // Forms only submit to same origin
-        "frame-ancestors 'self'",                                         // Equivalent to X-Frame-Options in CSP
-        "upgrade-insecure-requests",                                      // Auto-upgrade HTTP to HTTPS
+        "script-src 'self' 'unsafe-inline'",                                
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",  
+        "font-src 'self' https://fonts.gstatic.com",                     
+        "img-src 'self' data: https:",                                    
+        "connect-src 'self'",                                             
+        "frame-src 'none'",                                               
+        "object-src 'none'",                                              
+        "base-uri 'self'",                                                
+        "form-action 'self'",                                             
+        "frame-ancestors 'self'",                                         
+        "upgrade-insecure-requests",                                      
     ];
     header('Content-Security-Policy: ' . implode('; ', $csp_directives));
 

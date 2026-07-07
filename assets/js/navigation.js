@@ -1,6 +1,3 @@
-/**
- * navigation.js — Navbar behavior & Theme Toggle
- */
 (function () {
     'use strict';
 

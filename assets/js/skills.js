@@ -1,6 +1,3 @@
-/**
- * skills.js — Animate skill bars on scroll entry
- */
 (function () {
     'use strict';
 

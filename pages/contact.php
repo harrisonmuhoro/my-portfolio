@@ -1,7 +1,4 @@
 <?php
-/**
- * pages/contact.php — Redesigned: clean contact with form + direct links
- */
 $page_css = ['contact'];
 require_once __DIR__ . '/../includes/header.php';
 // navigation.php included inside header.php

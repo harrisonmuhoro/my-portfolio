@@ -1,7 +1,5 @@
 <?php
-/**
- * pages/404.php
- */
+
 $page_title       = '404 — Page Not Found | ' . SITE_NAME;
 $page_description = 'The page you are looking for does not exist.';
 require_once __DIR__ . '/../includes/header.php';
