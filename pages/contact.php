@@ -64,7 +64,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                             </div>
                             <div class="contact-channel__body">
                                 <div class="contact-channel__label">GitHub</div>
-                                <div class="contact-channel__value">github.com/Ziha546</div>
+                                <div class="contact-channel__value">github.com/harrisonmuhoro</div>
                             </div>
                             <svg class="contact-channel__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(convert --version)",
+      "Bash(command -v php)",
+      "Bash(php -r \"echo 'GD: ', \\(extension_loaded\\('gd'\\)?'yes':'no'\\), PHP_EOL; echo 'JPEG: ', \\(function_exists\\('imagejpeg'\\)?'yes':'no'\\), PHP_EOL; echo 'PNG: ', \\(function_exists\\('imagepng'\\)?'yes':'no'\\), PHP_EOL; echo 'FT: ', \\(function_exists\\('imagettftext'\\)?'yes':'no'\\), PHP_EOL;\")",
+      "Bash(ls /c/wamp*/bin/php/)",
+      "Bash(ls /c/wamp*/bin/php/*/php.exe)",
+      "Bash(ls -d /d/wamp*/bin/php/php*)",
+      "Read(//d/wamp/bin/php//**)",
+      "Bash(php -l 'D:\\\\wamp\\\\www\\\\harrison-portfolio\\\\pages\\\\home-redesign.php')",
+      "Bash($PHP *)",
+      "Bash(/d/wamp/bin/php/php8.3.28/php.exe assets/gen_assets.php)",
+      "Bash(/d/wamp/bin/php/php8.3.28/php.exe -r 'echo '\\\\''zlib: '\\\\'', \\(extension_loaded\\('\\\\''zlib'\\\\''\\)?'\\\\''yes'\\\\'':'\\\\''no'\\\\''\\), PHP_EOL;')",
+      "Bash(/d/wamp/bin/php/php8.3.28/php.exe -m)",
+      "Bash(/d/wamp/bin/php/php8.3.28/php.exe assets/gen_cv.php)"
+    ]
+  }
+}
