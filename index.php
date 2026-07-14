@@ -1,8 +1,4 @@
 <?php
-/**
- * Root index.php — Entry point & Router
- * Works at localhost/harrison/ or any subdirectory
- */
 
 // Define the project root as a constant so all includes work
 define('PROJECT_ROOT', __DIR__);
