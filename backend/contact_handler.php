@@ -135,7 +135,7 @@ $email_body .= "Reply directly to: " . $email . "\n";
 
 // ── Headers — prevent injection by using sanitized values ────
 // Use a domain-relative From address to improve deliverability
-$host         = $_SERVER['HTTP_HOST'] ?? 'harrison.wasmer.app';
+$host         = $_SERVER['HTTP_HOST'] ?? 'harrisonmuhoro.wasmer.app';
 $from_email   = 'no-reply@' . $host;
 $from_name    = preg_replace('/[^a-zA-Z0-9 \-_]/', '', $name);
 
