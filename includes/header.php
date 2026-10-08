@@ -66,13 +66,13 @@ $base = rtrim(BASE_PATH, '/');
     </script>
 
     <!-- ── CSS Delivery ── -->
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css?v=2">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css?v=2">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css?v=2">
 
     <?php if (!empty($page_css) && is_array($page_css)): ?>
         <?php foreach ($page_css as $css_file): ?>
-            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css">
+            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css?v=2">
         <?php endforeach; ?>
     <?php endif; ?>
 
