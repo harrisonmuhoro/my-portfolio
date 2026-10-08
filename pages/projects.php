@@ -1,42 +1,60 @@
-<?php
+﻿<?php
 
 $page_css = ['projects'];
 require_once __DIR__ . '/../includes/header.php';
-// Header includes navigation.php
 
 $projects = [
     [
-        'id'          => 'afya-hms',
-        'title'       => 'Afya Hospital Management System',
-        'category'    => 'Enterprise Healthcare Solution',
-        'problem'     => 'Local healthcare facilities struggled with fragmented patient records, inefficient queue management, and inaccurate billing systems resulting in slow service delivery.',
-        'solution'    => 'Engineered a unified Hospital Management System (HMS) that centralizes electronic health records, automates billing, and streamlines patient triage.',
-        'impact'      => 'Designed to reduce duplicate record entry, speed patient movement between departments, and give administrators clearer operational visibility.',
-        'stack'       => ['PHP', 'Laravel', 'React', 'MySQL'],
-        'github'      => SOCIAL_LINKS['github'],
-        'demo'        => '#',
+        'id'            => 'afya-hms',
+        'title'         => 'Afya HMS',
+        'category'      => 'Hospital management',
+        'year'          => '2024–2025',
+        'tagline'       => 'A multi-branch hospital system for Kenyan healthcare.',
+        'problem'       => 'Facilities were drowning in paper and fragmented records. Front desk, labs, and pharmacy had no shared system — every handoff was friction, and billing errors were routine.',
+        'what_i_built'  => 'I designed the domain boundaries, wired the Laravel 11 API, built the React/TypeScript PWA, implemented live patient queues with Laravel Reverb, and integrated M-Pesa.',
+        'impact'        => 'Built to scale from 1,000 to 10,000+ concurrent users across branches. Duplicate entry goes away, and administrators get operational visibility they did not have before.',
+        'stack'         => ['Laravel 11', 'PHP 8.3', 'React 18', 'TypeScript', 'MySQL 8', 'Redis', 'Laravel Reverb', 'M-Pesa API', 'PWA'],
+        'github'        => 'https://github.com/harrisonmuhoro/afyahms',
+        'demo'          => '#',
     ],
     [
-        'id'          => 'kenai',
-        'title'       => 'KenAI Platform',
-        'category'    => 'NLP Analytics Dashboard',
-        'problem'     => 'Researchers lacked an accessible, localized platform to analyze Swahili text sentiment and extract meaningful entities from regional unstructured data.',
-        'solution'    => 'Developed KenAI, an NLP-driven dashboard that processes local text data, offering real-time sentiment analysis and structured data extraction pipelines.',
-        'impact'      => 'Supports faster review of large text sets and clearer, more localized analytics for African-language data.',
-        'stack'       => ['TypeScript', 'Node.js', 'Python', 'Redis'],
-        'github'      => SOCIAL_LINKS['github'],
-        'demo'        => '#',
+        'id'            => 'taara-hms',
+        'title'         => 'Taara HMS',
+        'category'      => 'Hotel operations',
+        'year'          => '2024–2025',
+        'tagline'       => 'Front desk to back-office finance, including M-Pesa.',
+        'problem'       => 'Hotel teams juggled reservations, housekeeping, restaurant POS, and finance in disconnected tools. Cash, card, and M-Pesa lived in different places.',
+        'what_i_built'  => 'The whole system: Laravel 11 and Blade, Safaricom Daraja for STK Push and C2B, queued PDF/CSV exports, and audit logging on every financial change.',
+        'impact'        => 'Hotels stop copy-pasting payment confirmations. Rate limits and audit trails protect against insider abuse and brute-force attacks.',
+        'stack'         => ['Laravel 11', 'PHP 8.3', 'Blade', 'TypeScript', 'MySQL 8', 'M-Pesa Daraja API', 'Vite'],
+        'github'        => 'https://github.com/harrisonmuhoro/Taara-HMS',
+        'demo'          => '#',
     ],
     [
-        'id'          => 'cognitara-portal',
-        'title'       => 'Student Internship Portal',
-        'category'    => 'Application Management System',
-        'problem'     => 'Cognitara Technology needed a structured system to manage student internship applications — replacing manual, error-prone processes.',
-        'solution'    => 'Built a digital portal that tracks applicants, statuses, and approvals in a centralized dashboard with role-based access.',
-        'impact'      => 'Streamlines application review by replacing manual, error-prone tracking with a centralized, role-aware dashboard.',
-        'stack'       => ['HTML', 'CSS', 'JavaScript', 'PHP'],
-        'github'      => SOCIAL_LINKS['github'],
-        'demo'        => '#',
+        'id'            => 'indutrack-ke',
+        'title'         => 'InduTrack KE',
+        'category'      => 'Industrial attachment',
+        'year'          => '2024–2025',
+        'tagline'       => 'Digitising Kenya’s student placement process.',
+        'problem'       => 'Attachment in Kenya still runs on paper logbooks, cold-call applications, and no institutional visibility. Logs can be faked. Companies get unvetted piles of applicants.',
+        'what_i_built'  => 'A six-role system (student, company, supervisors, institution admin, super admin), Laravel 11 API and React/Vite frontend, Africa’s Talking SMS, and queued PDFs for certificates and logbooks.',
+        'impact'        => 'Institutions get live placement tracking, compliance escalation, and exportable reports — instead of a process that ran on paper and trust.',
+        'stack'         => ['Laravel 11', 'React', 'Vite', 'TypeScript', 'MySQL 8', 'Laravel Sanctum', "Africa's Talking", 'Redis'],
+        'github'        => 'https://github.com/harrisonmuhoro/InduTrack-Ke',
+        'demo'          => '#',
+    ],
+    [
+        'id'            => 'vuka-portal',
+        'title'         => 'Vuka Attachment Portal',
+        'category'      => 'Government internship',
+        'year'          => '2024',
+        'tagline'       => 'From application to deployment for a government internship desk.',
+        'problem'       => 'Departments had no digital workflow. Applications arrived by hand, document checks were manual, and supervisors could not see where a candidate stood.',
+        'what_i_built'  => 'Authentication with email verification, Bearer sessions, four-tier RBAC with department isolation, Chart.js dashboards, CSV exports, and skeleton loaders throughout.',
+        'impact'        => 'A paper internship process becomes a logged, auditable one. Documents stay with authorised staff only.',
+        'stack'         => ['PHP', 'Laravel', 'MySQL', 'JavaScript', 'Chart.js'],
+        'github'        => 'https://github.com/harrisonmuhoro/vuka_attachment_portal',
+        'demo'          => '#',
     ],
 ];
 ?>
@@ -44,47 +62,70 @@ $projects = [
 <main id="main-content">
     <section class="projects-archive section">
         <div class="container">
-            <header class="section-heading reveal">
-                <span class="section-heading__label">Archive</span>
-                <h2>All Projects</h2>
+            <header class="section-heading">
+                <span class="section-heading__label">Projects</span>
+                <h1>Four systems I designed, built, and shipped</h1>
+                <p class="section-heading__sub">Each one solves a concrete operational problem in Kenya — hospitals, hotels, students, government desks.</p>
             </header>
+
+            <ol class="projects-toc">
+                <?php foreach ($projects as $i => $project): ?>
+                <li>
+                    <a href="#<?= htmlspecialchars($project['id']) ?>">
+                        <span class="projects-toc__year"><?= htmlspecialchars($project['year']) ?></span>
+                        <span class="projects-toc__title"><?= htmlspecialchars($project['title']) ?></span>
+                        <span class="projects-toc__line"><?= htmlspecialchars($project['tagline']) ?></span>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ol>
 
             <div class="projects-archive__list">
                 <?php foreach ($projects as $i => $project): ?>
-                <article class="project-list-card reveal reveal-delay-<?= min($i, 3) ?>">
-                    <div class="project-list-card__visual">
-                        <div class="project-list-card__placeholder">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                <article class="project-article" id="<?= htmlspecialchars($project['id']) ?>">
+                    <p class="project-article__meta">
+                        <span><?= htmlspecialchars($project['year']) ?></span>
+                        <span><?= htmlspecialchars($project['category']) ?></span>
+                    </p>
+                    <h2 class="project-article__title"><?= htmlspecialchars($project['title']) ?></h2>
+                    <p class="project-article__tagline"><?= htmlspecialchars($project['tagline']) ?></p>
+
+                    <div class="project-article__details">
+                        <div>
+                            <h3>The problem</h3>
+                            <p><?= htmlspecialchars($project['problem']) ?></p>
+                        </div>
+                        <div>
+                            <h3>What I built</h3>
+                            <p><?= htmlspecialchars($project['what_i_built']) ?></p>
+                        </div>
+                        <div>
+                            <h3>What changed</h3>
+                            <p><?= htmlspecialchars($project['impact']) ?></p>
                         </div>
                     </div>
-                    <div class="project-list-card__content">
-                        <div class="project-list-card__category"><?= htmlspecialchars($project['category']) ?></div>
-                        <h3 class="project-list-card__title"><?= htmlspecialchars($project['title']) ?></h3>
-                        
-                        <div class="project-list-card__details">
-                            <div class="project-list-card__detail">
-                                <h4>Problem</h4>
-                                <p><?= htmlspecialchars($project['problem']) ?></p>
-                            </div>
-                            <div class="project-list-card__detail">
-                                <h4>Solution & Impact</h4>
-                                <p><?= htmlspecialchars($project['solution']) ?> <?= htmlspecialchars($project['impact']) ?></p>
-                            </div>
-                        </div>
 
-                        <div class="project-list-card__stack">
-                            <?php foreach ($project['stack'] as $tech): ?>
-                            <span class="badge"><?= htmlspecialchars($tech) ?></span>
-                            <?php endforeach; ?>
-                        </div>
+                    <p class="project-article__stack"><?= htmlspecialchars(implode(' · ', $project['stack'])) ?></p>
 
-                        <div class="project-list-card__actions">
-                            <a href="<?= htmlspecialchars($project['demo']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn--primary">View Live</a>
-                            <a href="<?= htmlspecialchars($project['github']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn--outline">Source Code</a>
-                        </div>
+                    <div class="project-article__actions">
+                        <a href="<?= htmlspecialchars($project['github']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
+                            View on GitHub
+                        </a>
+                        <?php if ($project['demo'] !== '#'): ?>
+                        <a href="<?= htmlspecialchars($project['demo']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn--outline">
+                            Live demo
+                        </a>
+                        <?php endif; ?>
                     </div>
                 </article>
                 <?php endforeach; ?>
+            </div>
+
+            <div class="projects-github-cta">
+                <p>The code is open. Read the READMEs, or write if you want to talk through any of them.</p>
+                <a href="<?= SOCIAL_LINKS['github'] ?>" target="_blank" rel="noopener noreferrer" class="btn btn--outline">
+                    GitHub
+                </a>
             </div>
         </div>
     </section>
