@@ -3,7 +3,7 @@
 # WAMP-compatible version (localhost/harrison)
 # ─────────────────────────────────────────────────────────────
 
-Options -Indexes
+# Options -Indexes # Causes Htaccess evaluation failed on Wasmer Edge
 
 # ── Rewrite Engine ─────────────────────────────────────────
 # WAMP: make sure mod_rewrite is enabled in Apache modules
@@ -123,11 +123,12 @@ Options -Indexes
 </IfModule>
 
 # ── PHP Display errors ON for local dev (WAMP) ──────────────
-<IfModule mod_php.c>
-    php_flag display_errors On
-    php_flag log_errors On
-</IfModule>
-<IfModule mod_php8.c>
-    php_flag display_errors On
-    php_flag log_errors On
-</IfModule>
+# Note: php_flag causes "Htaccess evaluation failed" on Wasmer Edge
+# <IfModule mod_php.c>
+#     php_flag display_errors On
+#     php_flag log_errors On
+# </IfModule>
+# <IfModule mod_php8.c>
+#     php_flag display_errors On
+#     php_flag log_errors On
+# </IfModule>
