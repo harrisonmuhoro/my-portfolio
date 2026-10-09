@@ -22,6 +22,11 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                         I take full-time roles, freelance work, and consulting. On weekdays I usually reply within a day.
                     </p>
 
+                    <div class="contact-page__availability">
+                        <span class="contact-page__availability-dot" aria-hidden="true"></span>
+                        <span>Available for new projects &amp; full-time roles</span>
+                    </div>
+
                     <div class="contact-page__channels">
                         <a href="<?= SOCIAL_LINKS['email'] ?>" class="contact-channel">
                             <div class="contact-channel__icon" aria-hidden="true">
@@ -51,7 +56,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                             </div>
                             <div class="contact-channel__body">
                                 <div class="contact-channel__label">LinkedIn</div>
-                                <div class="contact-channel__value">Connect professionally</div>
+                                <div class="contact-channel__value">linkedin.com/in/zion-harrison</div>
                             </div>
                             <svg class="contact-channel__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>
@@ -62,17 +67,17 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                             </div>
                             <div class="contact-channel__body">
                                 <div class="contact-channel__label">GitHub</div>
-                                <div class="contact-channel__value">github.com/Ziha546</div>
+                                <div class="contact-channel__value">github.com/harrisonmuhoro</div>
                             </div>
                             <svg class="contact-channel__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>
 
-                        <a href="<?= BASE_PATH ?>/assets/Harrison_Muhoro_CV.pdf" target="_blank" rel="noopener noreferrer" class="contact-channel contact-channel--cta">
+                        <a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="contact-channel contact-channel--cta">
                             <div class="contact-channel__icon" aria-hidden="true">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             </div>
                             <div class="contact-channel__body">
-                                <div class="contact-channel__label">Résumé</div>
+                                <div class="contact-channel__label">Curriculum Vitae</div>
                                 <div class="contact-channel__value">Download PDF</div>
                             </div>
                             <svg class="contact-channel__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>

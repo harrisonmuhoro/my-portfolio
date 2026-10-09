@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Disallow internal and vendor directories
+Disallow: /backend/
+Disallow: /config/
+Disallow: /vendor/
+Disallow: /includes/
+
+# Sitemap location
+Sitemap: /sitemap.xml

@@ -31,6 +31,7 @@ $base = rtrim(BASE_PATH, '/');
     <meta name="author"      content="<?= htmlspecialchars(SEO_AUTHOR) ?>">
     <meta name="robots"      content="<?= htmlspecialchars(SEO_ROBOTS) ?>">
     <link rel="canonical"    href="<?= htmlspecialchars($page_canonical) ?>">
+    <link rel="sitemap"      type="application/xml" title="Sitemap" href="<?= $base ?>/sitemap.xml">
 
     <!-- ── Open Graph ── -->
     <meta property="og:type"        content="<?= htmlspecialchars(OG_TYPE) ?>">
@@ -66,13 +67,13 @@ $base = rtrim(BASE_PATH, '/');
     </script>
 
     <!-- ── CSS Delivery ── -->
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css?v=2">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css?v=2">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css?v=2">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css?v=3">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css?v=3">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css?v=3">
 
     <?php if (!empty($page_css) && is_array($page_css)): ?>
         <?php foreach ($page_css as $css_file): ?>
-            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css?v=2">
+            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css?v=3">
         <?php endforeach; ?>
     <?php endif; ?>
 
