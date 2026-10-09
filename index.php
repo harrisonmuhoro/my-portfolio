@@ -39,11 +39,13 @@ if (empty($path)) {
 
 // Map paths to page files
 $routes = [
-    '/'          => 'pages/home-redesign.php',
-    '/about'     => 'pages/about.php',
-    '/services'  => 'pages/services.php',
-    '/projects'  => 'pages/projects.php',
-    '/contact'   => 'pages/contact.php',
+    '/'            => 'pages/home-redesign.php',
+    '/about'       => 'pages/about.php',
+    '/services'    => 'pages/services.php',
+    '/projects'    => 'pages/projects.php',
+    '/contact'     => 'pages/contact.php',
+    '/sitemap.xml' => 'sitemap.xml.php',
+    '/robots.txt'  => 'robots.txt.php',
 ];
 
 // Determine the page file
