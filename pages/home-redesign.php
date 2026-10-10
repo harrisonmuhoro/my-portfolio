@@ -59,8 +59,8 @@ $certifications = [
         <div class="container hero-container">
             <div class="hero__copy">
                 <p class="hero__eyebrow">Software engineer · Nyeri, Kenya</p>
-                <h1 class="hero__headline">I write the systems hospitals and hotels run on.</h1>
-                <p class="hero__sentence">Patient records, room nights, M-Pesa, student attachments — the unglamorous work that cannot fail at 7am on a Monday.</p>
+                <h1 class="hero__headline">Software that outlasts the demo.</h1>
+                <p class="hero__sentence">Patient records, room nights, M-Pesa payments, student logbooks: the unglamorous work that cannot fail at 7am on a Monday. I build the backend systems teams depend on, and write them so the next developer can change them safely.</p>
                 <p class="hero__subheadline">Most of my time is backend architecture and APIs, with interfaces that still hold up when the front desk is busy. I care about the people who depend on the software, not the demo.</p>
                 <div class="hero__actions">
                     <a href="#contact" class="btn btn--primary">Write to me</a>

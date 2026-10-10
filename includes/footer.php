@@ -10,7 +10,7 @@ require_once __DIR__ . '/../config/config.php';
         <div class="footer__top">
             <div class="footer__brand">
                 <a href="<?= BASE_PATH ?>/" class="footer__logo"><?= OWNER_NAME ?></a>
-                <p class="footer__tagline">Software for hospitals, hotels, and institutions in Kenya.</p>
+                <p class="footer__tagline">Software engineer building dependable systems in Nyeri, Kenya.</p>
             </div>
 
             <nav class="footer__nav" aria-label="Footer Navigation">
