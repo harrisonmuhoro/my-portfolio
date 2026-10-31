@@ -25,9 +25,6 @@ $stack_categories = [
                     <p class="about-page__title"><?= PRIMARY_TITLE ?>, Nyeri</p>
 
                     <p class="about-page__para">
-                        I build software around real-world problems.
-                    </p>
-                    <p class="about-page__para">
                         I'm Harrison, a software developer from Kenya focused on creating practical digital solutions for businesses and organizations.
                     </p>
                     <p class="about-page__para">
