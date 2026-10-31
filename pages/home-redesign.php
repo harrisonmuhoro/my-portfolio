@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $page_css = ['home'];
 require_once __DIR__ . '/../includes/header.php';
 
@@ -59,15 +59,17 @@ $certifications = [
         <div class="container hero-container">
             <div class="hero__copy">
                 <p class="hero__eyebrow">Software engineer · Nyeri, Kenya</p>
-                <h1 class="hero__headline">Software that outlasts the demo.</h1>
-                <p class="hero__sentence">Patient records, room nights, M-Pesa payments, student logbooks: the unglamorous work that cannot fail at 7am on a Monday. I build the backend systems teams depend on, and write them so the next developer can change them safely.</p>
-                <p class="hero__subheadline">Most of my time is backend architecture and APIs, with interfaces that still hold up when the front desk is busy. I care about the people who depend on the software, not the demo.</p>
+                <h1 class="hero__headline">Digital solutions built for the way your business works.</h1>
+                <p class="hero__sentence">I build reliable digital systems that make everyday work simpler, faster, and easier to manage.</p>
+                <p class="hero__sentence">From hospitals and hotels to schools and businesses, I create software that helps teams manage their operations, reduce paperwork, organize information, and serve their customers better. I focus on building solutions that work reliably in the real world—not just impressive demos.</p>
+                <p class="hero__subheadline">I take complex business processes and turn them into clear, practical digital experiences. Whether you need a new system, want to improve an existing one, or have a process that is still running on paper, I build software around the way your organization actually works.</p>
                 <div class="hero__actions">
                     <a href="#contact" class="btn btn--primary">Write to me</a>
                     <a href="<?= BASE_PATH ?>/projects" class="btn btn--outline">See the work</a>
                 </div>
             </div>
 
+            
             <figure class="hero__photo">
                 <img src="<?= BASE_PATH ?>/assets/images/harrison2.jpg" alt="<?= OWNER_NAME ?>, software engineer in Kenya" width="520" height="640" loading="eager">
                 <figcaption><?= OWNER_NAME ?>, photographed in Kenya</figcaption>
