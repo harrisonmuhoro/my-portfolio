@@ -25,10 +25,19 @@ $stack_categories = [
                     <p class="about-page__title"><?= PRIMARY_TITLE ?>, Nyeri</p>
 
                     <p class="about-page__para">
-                        I'm Harrison — a software engineer from Nyeri, Kenya. I got into this because I kept seeing organisations struggle with problems software could actually solve: hospitals losing records between departments, hotels reconciling M-Pesa by hand at close of day, students navigating an attachment system that ran on paper and trust.
+                        I build software around real-world problems.
                     </p>
                     <p class="about-page__para">
-                        I work primarily in PHP and Laravel on the backend and React and TypeScript on the frontend. Healthcare, hospitality, and education have all taught me the same lesson: the software has to hold up when real people hit it under pressure.
+                        I'm Harrison, a software developer from Kenya focused on creating practical digital solutions for businesses and organizations.
+                    </p>
+                    <p class="about-page__para">
+                        I build systems that help teams replace repetitive manual work, organize information, manage daily operations, and deliver better services to the people they serve.
+                    </p>
+                    <p class="about-page__para">
+                        My approach is simple: understand how the work is actually done, identify what can be improved, and build software that makes the process easier without making it unnecessarily complicated.
+                    </p>
+                    <p class="about-page__para">
+                        From healthcare and hospitality to education and business operations, I enjoy turning challenging workflows into reliable, easy-to-use digital solutions.
                     </p>
                     <p class="about-page__para">
                         I care about readable architecture and leaving a team better than I found it. The best system is the one someone else can still understand six months after it ships.
