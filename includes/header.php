@@ -10,8 +10,12 @@ $page_title       = $page_title       ?? SITE_NAME . ' — ' . PRIMARY_TITLE;
 $page_description = $page_description ?? SITE_DESCRIPTION;
 
 // Clean REQUEST_URI — strip query strings from canonical
-$clean_uri        = strtok($_SERVER['REQUEST_URI'], '?');
-$page_canonical   = $page_canonical   ?? rtrim(SITE_URL, '/') . $clean_uri;
+$clean_uri        = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
+if (BASE_PATH !== '' && strpos($clean_uri, BASE_PATH) === 0) {
+    $clean_uri = substr($clean_uri, strlen(BASE_PATH)) ?: '/';
+}
+$clean_uri        = $clean_uri === '/' ? '/' : '/' . trim($clean_uri, '/');
+$page_canonical   = $page_canonical   ?? SITE_URL . $clean_uri;
 $page_og_image    = $page_og_image    ?? OG_IMAGE;
 
 // Ensure BASE_PATH never has a trailing slash
@@ -44,6 +48,7 @@ $base = rtrim(BASE_PATH, '/');
 
     <!-- ── Twitter Card ── -->
     <meta name="twitter:card"        content="<?= htmlspecialchars(TWITTER_CARD) ?>">
+    <meta name="twitter:url"         content="<?= htmlspecialchars($page_canonical) ?>">
     <meta name="twitter:title"       content="<?= htmlspecialchars($page_title) ?>">
     <meta name="twitter:description" content="<?= htmlspecialchars($page_description) ?>">
     <meta name="twitter:image"       content="<?= htmlspecialchars($page_og_image) ?>">

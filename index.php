@@ -5,6 +5,22 @@ define('PROJECT_ROOT', __DIR__);
 
 require_once PROJECT_ROOT . '/config/config.php';
 
+// Consolidate the public domain and non-root trailing slashes in one hop.
+// Restrict redirects to our own domain aliases; local and preview hosts are
+// left to their respective development/deployment environments.
+$requestHost = strtolower(preg_replace('/:\\d+$/', '', $_SERVER['HTTP_HOST'] ?? ''));
+$canonicalHosts = ['harrisonmuhoro.me', 'www.harrisonmuhoro.me'];
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$canonicalPath = $requestPath === '/' ? '/' : rtrim($requestPath, '/');
+if (in_array($requestHost, $canonicalHosts, true)
+    && (!$isHttps || $requestHost !== 'www.harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
+    $query = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_QUERY);
+    header('Location: https://www.harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
+    exit;
+}
+
 // ── Send security headers (MUST be before any output) ──────
 require_once PROJECT_ROOT . '/config/security_headers.php';
 
