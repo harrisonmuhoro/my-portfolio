@@ -15,9 +15,9 @@ $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $canonicalPath = $requestPath === '/' ? '/' : rtrim($requestPath, '/');
 if (in_array($requestHost, $canonicalHosts, true)
-    && (!$isHttps || $requestHost !== 'www.harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
+    && (!$isHttps || $requestHost !== 'harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
     $query = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_QUERY);
-    header('Location: https://www.harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
+    header('Location: https://harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
     exit;
 }
 
