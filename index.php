@@ -10,12 +10,10 @@ require_once PROJECT_ROOT . '/config/config.php';
 // left to their respective development/deployment environments.
 $requestHost = strtolower(preg_replace('/:\\d+$/', '', $_SERVER['HTTP_HOST'] ?? ''));
 $canonicalHosts = ['harrisonmuhoro.me', 'www.harrisonmuhoro.me'];
-$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-    || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $canonicalPath = $requestPath === '/' ? '/' : rtrim($requestPath, '/');
 if (in_array($requestHost, $canonicalHosts, true)
-    && (!$isHttps || $requestHost !== 'harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
+    && ($requestHost !== 'harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
     $query = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_QUERY);
     header('Location: https://harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
     exit;
