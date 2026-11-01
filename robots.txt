@@ -8,4 +8,4 @@ Disallow: /vendor/
 Disallow: /includes/
 
 # Sitemap location
-Sitemap: https://harrisonmuhoro.me/sitemap.xml
+Sitemap: https://www.harrisonmuhoro.me/sitemap.xml

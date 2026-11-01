@@ -13,9 +13,9 @@ $canonicalHosts = ['harrisonmuhoro.me', 'www.harrisonmuhoro.me'];
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $canonicalPath = $requestPath === '/' ? '/' : rtrim($requestPath, '/');
 if (in_array($requestHost, $canonicalHosts, true)
-    && ($requestHost !== 'harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
+    && ($requestHost !== 'www.harrisonmuhoro.me' || $requestPath !== $canonicalPath)) {
     $query = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_QUERY);
-    header('Location: https://harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
+    header('Location: https://www.harrisonmuhoro.me' . $canonicalPath . ($query ? '?' . $query : ''), true, 301);
     exit;
 }
 

@@ -20,7 +20,7 @@ unset($_doc_root, $_proj_root, $_base_path);
 define('SITE_NAME', 'Harrison Muhoro');
 define('SITE_TAGLINE', 'Building Systems That Work. Delivering Solutions That Scale.');
 define('SITE_DESCRIPTION', 'Harrison Muhoro is a software engineer in Kenya who builds production-ready enterprise systems—backend architecture, performant web applications, and maintainable software for healthcare, operations, and business teams.');
-define('SITE_URL', getenv('SITE_URL') ?: 'https://harrisonmuhoro.me'); 
+define('SITE_URL', getenv('SITE_URL') ?: 'https://www.harrisonmuhoro.me');
 define('SITE_VERSION', '1.0.0');
 define('SITE_LANGUAGE', 'en-KE');
 define('SITE_LOCALE', 'en_KE');

@@ -48,7 +48,7 @@ define('SITE_TAGLINE',     'Building Systems That Work. Delivering Solutions Tha
 define('SITE_DESCRIPTION', 'Harrison Muhoro is a software engineer in Kenya who builds production-ready enterprise systems—backend architecture, performant web applications, and maintainable software for healthcare, operations, and business teams.');
 // Use the production domain directly so deployment environment variables
 // cannot leak the former Wasmer hostname into canonicals or the sitemap.
-$canonicalOrigin = $_is_local ? rtrim(BASE_URL, '/') : 'https://harrisonmuhoro.me';
+$canonicalOrigin = $_is_local ? rtrim(BASE_URL, '/') : 'https://www.harrisonmuhoro.me';
 define('SITE_URL',         $canonicalOrigin);
 define('SITE_VERSION',     '1.0.0');
 define('SITE_LANGUAGE',    'en-KE');
