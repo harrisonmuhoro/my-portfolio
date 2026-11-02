@@ -177,11 +177,10 @@ them, recreate a short GD script using those values — GD must be enabled in PH
 
 ## Replace the placeholder CV
 
-`assets/docs/harrison-muhoro-cv.pdf` is an **auto-generated placeholder** built
-only from public site data (contact, skills, selected projects) — it contains no
-fabricated employment history. Replace it with your real résumé using the **same
-filename** so the "Download CV" button serves your document. The path is set by
-`CV_PATH` in `config/config.php`.
+The current résumé is `assets/docs/Harrison_Muhoro_Resume.pdf`. The shared
+`CV_PATH` in `config/config.php` opens this PDF in the browser's built-in viewer.
+The older `assets/docs/harrison-muhoro-cv.pdf` is a generated placeholder and
+is no longer linked by the site.
 
 ---
 

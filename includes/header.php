@@ -66,19 +66,20 @@ $base = rtrim(BASE_PATH, '/');
     <!-- ── Theme Persistence ── -->
     <script>
         (function() {
+            document.documentElement.classList.add('js');
             const savedTheme = localStorage.getItem('theme');
             document.documentElement.setAttribute('data-theme', savedTheme === 'dark' ? 'dark' : 'light');
         })();
     </script>
 
     <!-- ── CSS Delivery ── -->
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css?v=3">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css?v=3">
-    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css?v=3">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/global.css?v=4">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/navigation.css?v=4">
+    <link rel="stylesheet" href="<?= $base ?>/assets/css/footer.css?v=4">
 
     <?php if (!empty($page_css) && is_array($page_css)): ?>
         <?php foreach ($page_css as $css_file): ?>
-            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css?v=3">
+            <link rel="stylesheet" href="<?= $base ?>/assets/css/<?= htmlspecialchars($css_file) ?>.css?v=4">
         <?php endforeach; ?>
     <?php endif; ?>
 
@@ -105,4 +106,5 @@ $base = rtrim(BASE_PATH, '/');
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="scroll-progress" aria-hidden="true"><span class="scroll-progress__bar"></span></div>
 <?php require_once __DIR__ . '/navigation.php'; ?>

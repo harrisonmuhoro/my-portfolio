@@ -62,15 +62,15 @@ $projects = [
 <main id="main-content">
     <section class="projects-archive section">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Projects</span>
                 <h1>Four systems I designed, built, and shipped</h1>
                 <p class="section-heading__sub">Each one solves a concrete operational problem in Kenya — hospitals, hotels, students, government desks.</p>
             </header>
 
-            <ol class="projects-toc">
+            <ol class="projects-toc reveal-group">
                 <?php foreach ($projects as $i => $project): ?>
-                <li>
+                <li class="reveal">
                     <a href="#<?= htmlspecialchars($project['id']) ?>">
                         <span class="projects-toc__year"><?= htmlspecialchars($project['year']) ?></span>
                         <span class="projects-toc__title"><?= htmlspecialchars($project['title']) ?></span>
@@ -82,7 +82,7 @@ $projects = [
 
             <div class="projects-archive__list">
                 <?php foreach ($projects as $i => $project): ?>
-                <article class="project-article" id="<?= htmlspecialchars($project['id']) ?>">
+                <article class="project-article reveal" id="<?= htmlspecialchars($project['id']) ?>">
                     <p class="project-article__meta">
                         <span><?= htmlspecialchars($project['year']) ?></span>
                         <span><?= htmlspecialchars($project['category']) ?></span>
@@ -121,7 +121,7 @@ $projects = [
                 <?php endforeach; ?>
             </div>
 
-            <div class="projects-github-cta">
+            <div class="projects-github-cta reveal">
                 <p>The code is open. Read the READMEs, or write if you want to talk through any of them.</p>
                 <a href="<?= SOCIAL_LINKS['github'] ?>" target="_blank" rel="noopener noreferrer" class="btn btn--outline">
                     GitHub

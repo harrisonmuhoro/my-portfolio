@@ -47,7 +47,7 @@ define('SOCIAL_LINKS', [
 ]);
 
 // ─── CV / RESUME ──────────────────────────────────────────
-define('CV_PATH', SITE_URL . '/assets/docs/harrison-muhoro-cv.pdf');
+define('CV_PATH', SITE_URL . '/assets/docs/Harrison_Muhoro_Resume.pdf#toolbar=0&navpanes=0');
 
 // ─── DATABASE ─────────────────────────────────────────────
 define('DB_HOST', 'localhost');

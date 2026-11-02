@@ -31,7 +31,7 @@ $services = [
     <section class="services-page section" id="services">
         <div class="container">
 
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Services</span>
                 <h1>What I take on</h1>
                 <p class="services-page__sub">Businesses, institutions, and government desks that need software for a real operational problem — not a brochure site.</p>
@@ -39,7 +39,7 @@ $services = [
 
             <ol class="services-list">
                 <?php foreach ($services as $i => $service): ?>
-                <li class="service-row">
+                <li class="service-row reveal">
                     <span class="service-row__num"><?= str_pad((string) ($i + 1), 2, '0', STR_PAD_LEFT) ?></span>
                     <div>
                         <h2 class="service-row__title"><?= htmlspecialchars($service['label']) ?></h2>
@@ -50,7 +50,7 @@ $services = [
                 <?php endforeach; ?>
             </ol>
 
-            <div class="services-page__cta">
+            <div class="services-page__cta reveal">
                 <h2>If you already know the problem, write.</h2>
                 <p>We can talk through what you need built and whether I am the right person for it.</p>
                 <a href="<?= BASE_PATH ?>/contact" class="btn btn--primary">Contact</a>

@@ -4,7 +4,7 @@
  */
 require_once __DIR__ . '/../config/config.php';
 ?>
-<footer class="footer" role="contentinfo">
+<footer class="footer reveal" role="contentinfo">
     <div class="container footer__container">
 
         <div class="footer__top">

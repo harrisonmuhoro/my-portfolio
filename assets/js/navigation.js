@@ -16,21 +16,39 @@
         }
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Run on load
+    if (header) {
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Run on load
+    }
 
     // ── Mobile Menu Toggle ──────────────────────────
     function toggleMobileMenu() {
         const isExpanded = hamburger.getAttribute('aria-expanded') === 'true';
-        hamburger.setAttribute('aria-expanded', !isExpanded);
+        const nextExpanded = !isExpanded;
+        hamburger.setAttribute('aria-expanded', nextExpanded);
         mobileMenu.classList.toggle('is-open');
         mobileMenu.setAttribute('aria-hidden', isExpanded);
-        document.body.style.overflow = isExpanded ? '' : 'hidden'; // Prevent scrolling
+        mobileMenu.querySelectorAll('.nav-mobile__link').forEach(function (link) {
+            link.tabIndex = nextExpanded ? 0 : -1;
+        });
+        document.body.style.overflow = nextExpanded ? 'hidden' : ''; // Prevent scrolling
+        if (nextExpanded) {
+            const firstLink = mobileMenu.querySelector('.nav-mobile__link');
+            if (firstLink) firstLink.focus();
+        } else {
+            hamburger.focus();
+        }
     }
 
     if (hamburger) {
         hamburger.addEventListener('click', toggleMobileMenu);
     }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && mobileMenu && mobileMenu.classList.contains('is-open')) {
+            toggleMobileMenu();
+        }
+    });
 
     // Close menu when clicking a mobile link
     navLinks.forEach(function (link) {
@@ -67,7 +85,7 @@
 
     // Active link based on scroll position
     const sections = document.querySelectorAll('section[id]');
-    const observer = new IntersectionObserver(
+    const observer = 'IntersectionObserver' in window ? new IntersectionObserver(
         function (entries) {
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
@@ -81,8 +99,8 @@
             });
         },
         { rootMargin: '-40% 0px -55% 0px' }
-    );
-    sections.forEach(function (s) { observer.observe(s); });
+    ) : null;
+    if (observer) sections.forEach(function (s) { observer.observe(s); });
 
 
     // ── Theme Toggle ───────────────────────────────

@@ -57,6 +57,11 @@
     aspect-ratio: 4 / 5;
     object-fit: cover;
     filter: sepia(0.12) contrast(1.04);
+    transition: transform 650ms ease;
+}
+
+.about-page__photo:hover .about-page__img {
+    transform: scale(1.015);
 }
 
 .about-page__photo figcaption {
@@ -139,6 +144,16 @@
 .index-list p {
     color: var(--clr-text-muted);
     max-width: 40rem;
+}
+
+.stack-inventory__row,
+.index-list__item {
+    transition: transform var(--transition-fast);
+}
+
+.stack-inventory__row:hover,
+.index-list__item:hover {
+    transform: translateX(4px);
 }
 
 .index-list__stack {

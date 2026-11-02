@@ -21,7 +21,10 @@
     grid-template-columns: 1fr;
     gap: var(--space-1);
     padding-block: var(--space-5);
+    transition: transform var(--transition-fast);
 }
+
+.projects-toc a:hover { transform: translateX(4px); }
 
 @media (min-width: 720px) {
     .projects-toc a {
@@ -61,6 +64,11 @@
     padding-block: var(--space-16);
     border-top: 1px solid var(--clr-rule);
     max-width: 42rem;
+    transition: transform var(--transition-base);
+}
+
+.project-article:hover {
+    transform: translateX(4px);
 }
 
 .project-article__meta {

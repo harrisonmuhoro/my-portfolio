@@ -66,6 +66,11 @@
     aspect-ratio: 4 / 5;
     object-fit: cover;
     filter: sepia(0.12) contrast(1.04);
+    transition: transform 650ms ease;
+}
+
+.hero__photo:hover img {
+    transform: scale(1.015);
 }
 
 .hero__photo figcaption {
@@ -90,6 +95,7 @@
 .case-study {
     padding-block: var(--space-16);
     border-top: 1px solid var(--clr-rule);
+    transition: transform var(--transition-base);
 }
 
 .case-study__inner {
@@ -176,9 +182,24 @@
     flex-wrap: wrap;
 }
 
+.case-study__actions .btn,
+.contact-close__links a,
+.projects-toc a,
+.index-list__item {
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.projects-toc a:hover,
+.index-list__item:hover {
+    transform: translateX(4px);
+}
+
 .stack-list {
     border-top: 1px solid var(--clr-rule);
 }
+
+.stack-list__row { transition: transform var(--transition-fast); }
+.stack-list__row:hover { transform: translateX(4px); }
 
 .stack-list__row {
     display: grid;
@@ -252,7 +273,10 @@
     gap: var(--space-1);
     padding-block: var(--space-5);
     border-bottom: 1px solid var(--clr-rule);
+    transition: transform var(--transition-fast);
 }
+
+.cert-list li:hover { transform: translateX(4px); }
 
 @media (min-width: 640px) {
     .cert-list li {
@@ -339,5 +363,39 @@
     .case-study__actions {
         flex-direction: column;
         align-items: stretch;
+    }
+}
+
+/* ── Motion enhancements ── */
+
+/* Case-study article: subtle blockquote accent */
+.case-study__quote {
+    transition: border-color var(--transition-base);
+}
+
+/* Cert-list row hover */
+.cert-list li {
+    transition: transform var(--transition-fast);
+}
+
+/* Contact link arrow micro-interaction */
+.contact-close__links a {
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    display: inline-block;
+}
+
+.contact-close__links a:hover {
+    transform: translateX(3px);
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+    .stack-list__row,
+    .cert-list li,
+    .index-list__item,
+    .projects-toc a,
+    .contact-close__links a {
+        transition: none !important;
+        transform: none !important;
     }
 }

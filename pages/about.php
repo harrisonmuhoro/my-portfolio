@@ -19,34 +19,34 @@ $stack_categories = [
         <div class="container">
 
             <div class="about-page__grid">
-                <div class="about-page__bio">
+                <div class="about-page__bio reveal-stagger">
                     <span class="section-heading__label">About</span>
-                    <h1 class="about-page__name"><?= OWNER_NAME ?></h1>
+                    <h1 class="about-page__name reveal"><?= OWNER_NAME ?></h1>
                     <p class="about-page__title"><?= PRIMARY_TITLE ?>, Nyeri</p>
 
-                    <p class="about-page__para">
+                    <p class="about-page__para reveal">
                         I'm Harrison, a software developer from Kenya focused on creating practical digital solutions for businesses and organizations.
                     </p>
-                    <p class="about-page__para">
+                    <p class="about-page__para reveal">
                         I build systems that help teams replace repetitive manual work, organize information, manage daily operations, and deliver better services to the people they serve.
                     </p>
-                    <p class="about-page__para">
+                    <p class="about-page__para reveal">
                         My approach is simple: understand how the work is actually done, identify what can be improved, and build software that makes the process easier without making it unnecessarily complicated.
                     </p>
-                    <p class="about-page__para">
+                    <p class="about-page__para reveal">
                         From healthcare and hospitality to education and business operations, I enjoy turning challenging workflows into reliable, easy-to-use digital solutions.
                     </p>
-                    <p class="about-page__para">
+                    <p class="about-page__para reveal">
                         I care about readable architecture and leaving a team better than I found it. The best system is the one someone else can still understand six months after it ships.
                     </p>
 
-                    <div class="about-page__cta">
+                    <div class="about-page__cta reveal">
                         <a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="btn btn--primary">Download CV</a>
                         <a href="<?= BASE_PATH ?>/contact" class="btn btn--outline">Write to me</a>
                     </div>
                 </div>
 
-                <figure class="about-page__photo">
+                <figure class="about-page__photo reveal reveal--image">
                     <img
                         src="<?= BASE_PATH ?>/assets/images/harrison2.jpg"
                         alt="<?= OWNER_NAME ?> — software engineer, Kenya"
@@ -63,7 +63,7 @@ $stack_categories = [
 
     <section class="stack-page section" id="stack">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Tools</span>
                 <h2>What I reach for</h2>
             </header>
@@ -81,7 +81,7 @@ $stack_categories = [
 
     <section class="building-section section" id="building">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">On the desk</span>
                 <h2>Currently building</h2>
             </header>

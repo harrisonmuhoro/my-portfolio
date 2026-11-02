@@ -146,7 +146,7 @@ img, svg {
     font-weight: 500;
     font-size: var(--text-sm);
     cursor: pointer;
-    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
     text-decoration: none;
     border: 1px solid transparent;
     letter-spacing: 0.01em;
@@ -192,6 +192,16 @@ img, svg {
 
 .btn--text:hover {
     color: var(--clr-text-base);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn:focus-visible { transform: translateY(-1px); }
+
+.btn:active {
+    transform: translateY(0);
 }
 
 .form-group {
@@ -247,11 +257,49 @@ img, svg {
     outline-offset: 3px;
 }
 
-.reveal,
-.reveal.is-visible {
+.reveal {
     opacity: 1;
     transform: none;
     transition: none;
+}
+
+html.motion-ready .reveal {
+    opacity: 0;
+    transform: translateY(1rem);
+    transition: opacity 520ms ease, transform 520ms ease;
+}
+
+html.motion-ready .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+html.motion-ready .reveal--image {
+    transform: translateY(1rem) scale(0.985);
+}
+
+html.motion-ready .reveal--image.is-visible {
+    transform: none;
+}
+
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 70ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 140ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 210ms; }
+.reveal-stagger > .reveal:nth-child(5) { transition-delay: 280ms; }
+.reveal-stagger .reveal:nth-of-type(2) { transition-delay: 70ms; }
+.reveal-stagger .reveal:nth-of-type(3) { transition-delay: 140ms; }
+.reveal-stagger .reveal:nth-of-type(4) { transition-delay: 210ms; }
+.reveal-stagger .reveal:nth-of-type(5) { transition-delay: 280ms; }
+.reveal-stagger .reveal:nth-of-type(6) { transition-delay: 350ms; }
+.reveal-group > .reveal:nth-child(2) { transition-delay: 70ms; }
+.reveal-group > .reveal:nth-child(3) { transition-delay: 140ms; }
+.reveal-group > .reveal:nth-child(4) { transition-delay: 210ms; }
+.reveal-group > .reveal:nth-child(5) { transition-delay: 280ms; }
+
+@media (max-width: 767px) {
+    html.motion-ready .reveal {
+        transform: translateY(0.7rem);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -260,6 +308,18 @@ img, svg {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+
+    html.motion-ready .reveal,
+    html.motion-ready .reveal.is-visible,
+    html.motion-ready .reveal--image,
+    html.motion-ready .reveal--image.is-visible {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .reveal-stagger .reveal,
+    .reveal-group .reveal { transition-delay: 0ms !important; }
 }
 
 .section-heading {
@@ -308,6 +368,9 @@ img, svg {
 .skip-link:focus {
     top: 0;
 }
+
+.scroll-progress { position: fixed; inset: 0 0 auto; z-index: 1200; height: 2px; pointer-events: none; }
+.scroll-progress__bar { display: block; width: 100%; height: 100%; background: var(--clr-accent); transform: scaleX(0); transform-origin: left center; }
 
 @media (max-width: 640px) {
     :root {

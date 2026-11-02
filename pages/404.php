@@ -6,13 +6,13 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <main id="main-content" class="not-found-page">
-    <div class="container not-found-page__inner">
+    <div class="container not-found-page__inner reveal-stagger">
         <p class="not-found-page__code">404</p>
-        <h1 class="not-found-page__title">This page is not here</h1>
-        <p class="not-found-page__desc">
+        <h1 class="not-found-page__title reveal">This page is not here</h1>
+        <p class="not-found-page__desc reveal">
             It may have moved, or the address is wrong. The work and contact pages still are.
         </p>
-        <div class="not-found-page__actions">
+        <div class="not-found-page__actions reveal">
             <a href="<?= BASE_PATH ?>/" class="btn btn--primary">Home</a>
             <a href="<?= BASE_PATH ?>/contact" class="btn btn--outline">Contact</a>
         </div>

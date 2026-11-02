@@ -15,19 +15,19 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
 
             <div class="contact-page__grid">
 
-                <div class="contact-page__info">
+                <div class="contact-page__info reveal-stagger">
                     <span class="section-heading__label">Contact</span>
-                    <h1 class="contact-page__title">A note is enough.</h1>
-                    <p class="contact-page__desc">
+                    <h1 class="contact-page__title reveal">A note is enough.</h1>
+                    <p class="contact-page__desc reveal">
                         I take full-time roles, freelance work, and consulting. On weekdays I usually reply within a day.
                     </p>
 
-                    <div class="contact-page__availability">
+                    <div class="contact-page__availability reveal">
                         <span class="contact-page__availability-dot" aria-hidden="true"></span>
                         <span>Available for new projects &amp; full-time roles</span>
                     </div>
 
-                    <div class="contact-page__channels">
+                    <div class="contact-page__channels reveal">
                         <a href="<?= SOCIAL_LINKS['email'] ?>" class="contact-channel">
                             <div class="contact-channel__icon" aria-hidden="true">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -85,7 +85,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                     </div>
                 </div>
 
-                <div class="contact-page__form">
+                <div class="contact-page__form reveal">
                     <h2 class="contact-page__form-title">Or use this form</h2>
 
                     <form

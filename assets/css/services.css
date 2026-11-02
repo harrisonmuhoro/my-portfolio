@@ -21,6 +21,11 @@
     gap: var(--space-6);
     padding-block: var(--space-10);
     border-bottom: 1px solid var(--clr-rule);
+    transition: transform var(--transition-fast);
+}
+
+.service-row:hover {
+    transform: translateX(4px);
 }
 
 .service-row__num {

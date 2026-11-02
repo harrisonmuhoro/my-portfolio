@@ -57,20 +57,20 @@ $certifications = [
 <main id="main-content">
     <section class="hero-section" id="hero">
         <div class="container hero-container">
-            <div class="hero__copy">
-                <p class="hero__eyebrow">Software engineer · Nyeri, Kenya</p>
-                <h1 class="hero__headline">Digital solutions built for the way your business works.</h1>
-                <p class="hero__sentence">I build reliable digital systems that make everyday work simpler, faster, and easier to manage.</p>
-                <p class="hero__sentence">From hospitals and hotels to schools and businesses, I create software that helps teams manage their operations, reduce paperwork, organize information, and serve their customers better. I focus on building solutions that work reliably in the real world—not just impressive demos.</p>
-                <p class="hero__subheadline">I take complex business processes and turn them into clear, practical digital experiences. Whether you need a new system, want to improve an existing one, or have a process that is still running on paper, I build software around the way your organization actually works.</p>
-                <div class="hero__actions">
+            <div class="hero__copy reveal-stagger">
+                <p class="hero__eyebrow reveal">Software engineer · Nyeri, Kenya</p>
+                <h1 class="hero__headline reveal">Digital solutions built for the way your business works.</h1>
+                <p class="hero__sentence reveal">I build reliable digital systems that make everyday work simpler, faster, and easier to manage.</p>
+                <p class="hero__sentence reveal">From hospitals and hotels to schools and businesses, I create software that helps teams manage their operations, reduce paperwork, organize information, and serve their customers better. I focus on building solutions that work reliably in the real world—not just impressive demos.</p>
+                <p class="hero__subheadline reveal">I take complex business processes and turn them into clear, practical digital experiences. Whether you need a new system, want to improve an existing one, or have a process that is still running on paper, I build software around the way your organization actually works.</p>
+                <div class="hero__actions reveal">
                     <a href="#contact" class="btn btn--primary">Write to me</a>
                     <a href="<?= BASE_PATH ?>/projects" class="btn btn--outline">See the work</a>
                 </div>
             </div>
 
             
-            <figure class="hero__photo">
+            <figure class="hero__photo reveal reveal--image">
                 <img src="<?= BASE_PATH ?>/assets/images/harrison2.jpg" alt="<?= OWNER_NAME ?>, software engineer in Kenya" width="520" height="640" loading="eager">
                 <figcaption><?= OWNER_NAME ?>, photographed in Kenya</figcaption>
             </figure>
@@ -79,7 +79,7 @@ $certifications = [
 
     <section class="work-index section" id="work">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Selected work</span>
                 <h2>Two systems that had to work in the real place, not only in a repo.</h2>
             </header>
@@ -87,7 +87,7 @@ $certifications = [
     </section>
 
     <?php foreach ($case_studies as $study): ?>
-    <article class="case-study" id="<?= htmlspecialchars($study['id']) ?>">
+    <article class="case-study reveal" id="<?= htmlspecialchars($study['id']) ?>">
         <div class="container case-study__inner">
             <div class="case-study__kicker">
                 <span class="case-study__number"><?= htmlspecialchars($study['number']) ?></span>
@@ -127,14 +127,14 @@ $certifications = [
 
     <section class="stack-section section" id="stack">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Tools I use</span>
                 <h2>A working stack, not a shopping list.</h2>
             </header>
 
-            <dl class="stack-list">
+            <dl class="stack-list reveal-group">
                 <?php foreach ($stack_categories as $category): ?>
-                <div class="stack-list__row">
+                <div class="stack-list__row reveal">
                     <dt><?= htmlspecialchars($category['name']) ?></dt>
                     <dd><?= htmlspecialchars($category['items']) ?></dd>
                 </div>
@@ -145,14 +145,14 @@ $certifications = [
 
     <section class="building-section section" id="building">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">On the desk</span>
                 <h2>What I am building now</h2>
             </header>
 
-            <ul class="index-list">
+            <ul class="index-list reveal-group">
                 <?php foreach ($currently_building as $item): ?>
-                <li class="index-list__item">
+                <li class="index-list__item reveal">
                     <span class="index-list__meta"><?= htmlspecialchars($item['status']) ?></span>
                     <h3><?= htmlspecialchars($item['title']) ?></h3>
                     <p><?= htmlspecialchars($item['desc']) ?></p>
@@ -165,14 +165,14 @@ $certifications = [
 
     <section class="cert-section section" id="certifications">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">Learning</span>
                 <h2>Certificates</h2>
             </header>
 
-            <ul class="cert-list">
+            <ul class="cert-list reveal-group">
                 <?php foreach ($certifications as $cert): ?>
-                <li>
+                <li class="reveal">
                     <span class="cert-list__year"><?= htmlspecialchars($cert['year']) ?></span>
                     <span class="cert-list__title"><?= htmlspecialchars($cert['title']) ?></span>
                     <span class="cert-list__issuer"><?= htmlspecialchars($cert['issuer']) ?></span>
@@ -184,11 +184,11 @@ $certifications = [
 
     <section class="about-section section" id="about">
         <div class="container">
-            <header class="section-heading">
+            <header class="section-heading reveal">
                 <span class="section-heading__label">About</span>
                 <h2>From Nyeri, building for places that still run on paper.</h2>
             </header>
-            <div class="about-content">
+            <div class="about-content reveal-stagger">
                 <p>I'm Harrison. I got into this because I kept watching hospitals, hotels, government desks, and universities lose time to problems software could actually fix. So I started fixing them.</p>
                 <p>I work mostly in PHP and Laravel on the server, React and TypeScript in the browser. I like code that is predictable six months later, when somebody else has to change it at 11pm.</p>
                 <p>On my own time I am building InduTrack KE, because I lived through Kenya's industrial attachment process and it was a mess of paper logbooks and guesswork.</p>
@@ -198,11 +198,11 @@ $certifications = [
     </section>
 
     <section class="contact-section section" id="contact">
-        <div class="container contact-close">
-            <span class="section-heading__label">Contact</span>
-            <h2>If you have a system that has to hold up, write.</h2>
-            <p>Roles, contracts, or a messy operational problem — I will answer with a clear next step, usually within a weekday.</p>
-            <div class="contact-close__links">
+        <div class="container contact-close reveal-stagger">
+            <span class="section-heading__label reveal">Contact</span>
+            <h2 class="reveal">If you have a system that has to hold up, write.</h2>
+            <p class="reveal">Roles, contracts, or a messy operational problem — I will answer with a clear next step, usually within a weekday.</p>
+            <div class="contact-close__links reveal-group">
                 <a href="<?= SOCIAL_LINKS['email'] ?>">Email</a>
                 <a href="<?= SOCIAL_LINKS['whatsapp'] ?>" target="_blank" rel="noopener noreferrer">WhatsApp</a>
                 <a href="<?= SOCIAL_LINKS['linkedin'] ?>" target="_blank" rel="noopener noreferrer">LinkedIn</a>

@@ -75,3 +75,29 @@
         align-items: center;
     }
 }
+
+/* ── Footer micro-interactions ── */
+.footer__nav a {
+    transition: color var(--transition-fast), transform var(--transition-fast);
+    display: inline-block;
+}
+
+.footer__nav a:hover {
+    transform: translateY(-1px);
+}
+
+.footer__logo {
+    transition: color var(--transition-fast);
+}
+
+.footer__logo:hover {
+    color: var(--clr-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .footer__nav a,
+    .footer__logo {
+        transition: color var(--transition-fast);
+        transform: none !important;
+    }
+}
