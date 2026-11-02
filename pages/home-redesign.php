@@ -71,7 +71,7 @@ $certifications = [
 
             
             <figure class="hero__photo reveal reveal--image">
-                <img src="<?= BASE_PATH ?>/assets/images/harrison2.jpg" alt="<?= OWNER_NAME ?>, software engineer in Kenya" width="520" height="640" loading="eager">
+                <img src="<?= BASE_PATH ?>/assets/images/harrison2.webp" alt="<?= OWNER_NAME ?>, software engineer in Kenya" width="520" height="640" loading="eager" fetchpriority="high">
                 <figcaption><?= OWNER_NAME ?>, photographed in Kenya</figcaption>
             </figure>
         </div>

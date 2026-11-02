@@ -48,7 +48,7 @@ $stack_categories = [
 
                 <figure class="about-page__photo reveal reveal--image">
                     <img
-                        src="<?= BASE_PATH ?>/assets/images/harrison2.jpg"
+                        src="<?= BASE_PATH ?>/assets/images/harrison2.webp"
                         alt="<?= OWNER_NAME ?> — software engineer, Kenya"
                         class="about-page__img"
                         width="480"

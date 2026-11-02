@@ -96,7 +96,7 @@ define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionh191@gmail.com');
 define('SEO_KEYWORDS',   'Web Developer Kenya, PHP Developer Kenya, Full-Stack Developer Kenya, Website Developer Nyeri, Business System Developer Kenya, Harrison Muhoro');
 define('SEO_AUTHOR',     OWNER_NAME);
 define('SEO_ROBOTS',     'index, follow');
-define('OG_IMAGE',       SITE_URL . '/assets/images/og-image.jpg');
+define('OG_IMAGE',       SITE_URL . '/assets/images/og-image.webp');
 define('OG_TYPE',        'website');
 define('TWITTER_CARD',   'summary_large_image');
 
