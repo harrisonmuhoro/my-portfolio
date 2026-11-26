@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../includes/i18n.php';
 
+// Opt this page (and its nav/footer chrome) into bilingual rendering.
+define('IT_I18N_ACTIVE', true);
+
 $page_title       = t('meta_title');
 $page_description = t('meta_desc');
 $seo_keywords    = t('meta_keywords');

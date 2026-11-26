@@ -10,9 +10,9 @@ $page_title       = $page_title       ?? SITE_NAME . ' — ' . PRIMARY_TITLE;
 $page_description = $page_description ?? SITE_DESCRIPTION;
 $seo_keywords     = $seo_keywords     ?? SEO_KEYWORDS;
 
-// Active UI language (set by includes/i18n.php on bilingual pages).
-// Anything outside the allowlist falls back to English.
-$page_lang  = $page_lang ?? (isset($lang) && in_array($lang, ['en', 'sw'], true) ? $lang : 'en');
+// Active UI language — honoured only on pages that opted into i18n
+// (IT_I18N_ACTIVE), so html lang/og:locale always agree with content.
+$page_lang  = $page_lang ?? (defined('IT_I18N_ACTIVE') && isset($lang) && in_array($lang, ['en', 'sw'], true) ? $lang : 'en');
 $html_lang  = $page_lang === 'sw' ? 'sw-KE' : SITE_LANGUAGE;
 $og_locale  = $page_lang === 'sw' ? 'sw_KE' : SITE_LOCALE;
 

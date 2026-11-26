@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  php-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring
+          coverage: none
+
+      - name: Lint all application PHP files
+        run: |
+          fail=0
+          while IFS= read -r f; do
+            if ! php -l "$f" > /dev/null; then
+              echo "SYNTAX ERROR: $f"
+              php -l "$f"
+              fail=1
+            fi
+          done < <(find . -name '*.php' -not -path './vendor/*' -not -path './.git/*')
+          exit $fail
+
+      - name: Run test suite
+        run: php tests/run_tests.php

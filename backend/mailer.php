@@ -78,7 +78,7 @@ function resend_send(string $subject, string $body, string $reply_to_email, stri
 
 /** POST JSON to the Resend API via cURL. Returns [body, http_code, error]. */
 function resend_http_post(string $json): array {
-    $ch = curl_init('https://api.resend.com/emails');
+    $ch = curl_init(RESEND_API_URL);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
@@ -105,7 +105,7 @@ function resend_http_post_streams(string $json): array {
         'timeout'       => 15,
         'ignore_errors' => true,
     ]]);
-    $resp = @file_get_contents('https://api.resend.com/emails', false, $ctx);
+    $resp = @file_get_contents(RESEND_API_URL, false, $ctx);
     $code = 0;
     if (isset($http_response_header[0]) && preg_match('#\s(\d{3})\s#', $http_response_header[0], $m)) {
         $code = (int) $m[1];

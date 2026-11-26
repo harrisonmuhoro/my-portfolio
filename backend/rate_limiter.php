@@ -7,6 +7,24 @@
  * caller identity (IP + form bucket), so clearing cookies or opening a new
  * browser session does not reset the limit.
  *
+ * DEPLOYMENT ASSUMPTIONS & FAILURE POLICY
+ * ---------------------------------------
+ * - Designed for a single application instance with a shared local
+ *   filesystem (WAMP, typical shared hosting, single-container PaaS such as
+ *   Wasmer Edge). If the app ever runs across multiple instances/containers
+ *   without shared storage, replace this with a shared atomic store
+ *   (Redis INCR+EXPIRE or a database) — file locks are not cross-host.
+ * - Client identity uses REMOTE_ADDR only. X-Forwarded-For / Client-IP are
+ *   deliberately ignored because they are client-spoofable unless a trusted
+ *   proxy is configured (none is, today).
+ * - Failure policy: FAIL OPEN. If the state directory cannot be created or
+ *   a file cannot be locked, the request is allowed and the failure is
+ *   logged. Rationale: a contact form should remain reachable during
+ *   storage incidents; the CSRF token, honeypot and input validation still
+ *   apply. Corrupted state files are treated as an expired window.
+ * - Retention: bucket files are deleted opportunistically (~2% of requests)
+ *   once they are older than twice the rate-limit window.
+ *
  * Not web-accessible: this file is only ever included by backend handlers.
  */
 
@@ -20,6 +38,10 @@ function rl_storage_dir(): string {
     $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
     if (!is_dir($dir)) {
         @mkdir($dir, 0700, true);
+    }
+    // If the directory exists but is not writable, surface it for logging.
+    if (is_dir($dir) && !is_writable($dir)) {
+        error_log('[RateLimiter] storage directory not writable: ' . $dir);
     }
     return $dir;
 }

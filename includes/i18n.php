@@ -43,9 +43,13 @@ function it_lang(): string {
  * Translate a key for the active (or given) language.
  * Falls back to English, then to the key itself.
  */
-function t(string $key, ?string $lang = null): string {
+/**
+ * The full translation dictionary.
+ * Exposed so tests (and tooling) can inspect entries directly instead of
+ * relying on t()'s English fallback.
+ */
+function it_dictionary(): array {
     static $dict = null;
-    $lang = $lang ?? it_lang();
     if ($dict === null) {
         $dict = [
             'en' => [
@@ -268,6 +272,16 @@ function t(string $key, ?string $lang = null): string {
             ],
         ];
     }
+    return $dict;
+}
+
+/**
+ * Translate a key for the active (or given) language.
+ * Falls back to English, then to the key itself.
+ */
+function t(string $key, ?string $lang = null): string {
+    $lang = $lang ?? it_lang();
+    $dict = it_dictionary();
     return $dict[$lang][$key] ?? $dict['en'][$key] ?? $key;
 }
 

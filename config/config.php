@@ -102,6 +102,7 @@ define('DB_CHARSET', 'utf8mb4');
 
 // ─── MAILER (Resend) ──────────────────────────────────────────────────────────
 if (!defined('RESEND_API_KEY')) define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
+if (!defined('RESEND_API_URL')) define('RESEND_API_URL', getenv('RESEND_API_URL') ?: 'https://api.resend.com/emails');
 if (!defined('MAIL_FROM'))      define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
 if (!defined('MAIL_TO'))        define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionh191@gmail.com');
 
