@@ -34,7 +34,20 @@ New/updated coverage:
 
 `php -l` clean on all modified files.
 
-## 4. Unresolved production-only checks
+## 4. Live production verification (executed post-deploy)
+
+| Check | Command | Result |
+|-------|---------|--------|
+| Homepage session cookie | `curl -sI https://www.harrisonmuhoro.me/` | ✅ 200, **no `Set-Cookie`** — lazy sessions live |
+| Contact cookie attrs | `curl -sI https://www.harrisonmuhoro.me/contact` | ✅ `PHPSESSID=…; path=/; secure; HttpOnly; SameSite=Lax` — **no `Domain=`** (host-only) |
+| robots.txt | `curl -s https://www.harrisonmuhoro.me/robots.txt` | ✅ dynamic output incl. `Disallow: /storage/` + canonical sitemap URL |
+| Unique titles/canonicals | curl `/`, `/about`, `/services`, `/projects`, `/contact` | ✅ all unique, all canonical `https://www.harrisonmuhoro.me/<path>` |
+| Language variants | curl `/it-support?lang=en` / `?lang=sw` | ✅ `lang="en-KE"`/`"sw-KE"`, self-canonicals `?lang=en`/`?lang=sw`, hreflang en/sw/x-default, distinct SW title |
+| Sitemap | curl `/sitemap.xml` | ✅ 7 URLs incl. both `?lang` entries, valid lastmod dates |
+| JSON-LD | curl `/` and `/about` | ✅ Person `@id=…/#person`, sameAs = GitHub+LinkedIn only; ProfilePage on `/about` |
+| Apex→www redirect | `curl -sI https://harrisonmuhoro.me/` | ⚠️ still **307** — edge-level, needs hosting config change |
+
+## 5. Unresolved production-only checks
 
 - **F4/F3-edge:** apex→www **307** is issued by the hosting edge before PHP — requires Wasmer Edge/host redirect rule changed to 301/308. App code already sends 301. Verify post-deploy: `curl -sI https://harrisonmuhoro.me/ | head -1`.
 - **F7:** certification claims preserved verbatim; owner verification pending.
