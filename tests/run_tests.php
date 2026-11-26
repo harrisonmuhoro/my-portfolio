@@ -776,6 +776,61 @@ foreach (['en', 'sw', 'x-default'] as $hl) {
 ok($seoTitle($seoHtml['/it-support?lang=en']) !== $seoTitle($seoHtml['/it-support?lang=sw']),
     'EN and SW IT Support pages render different titles');
 
+// Language isolation: an explicit ?lang= must override any stale session
+// preference; a missing ?lang= falls back to the session; invalid codes
+// are ignored entirely.
+$itProbe = function (?string $langGet, ?string $sessionLang): string {
+    $spec = ['page' => 'it-support.php', 'uri' => '/it-support', 'host' => 'www.harrisonmuhoro.me'];
+    if ($langGet !== null)    { $spec['get']     = ['lang' => $langGet]; }
+    if ($sessionLang !== null){ $spec['session'] = ['it_support_lang' => $sessionLang]; }
+    return page_probe($spec);
+};
+$itEnFromSw   = $itProbe('en', 'sw');   // session=sw, request ?lang=en
+$itSwFromEn   = $itProbe('sw', 'en');   // session=en, request ?lang=sw
+$itEnFresh    = $itProbe('en', null);   // no session, ?lang=en
+$itSwFresh    = $itProbe('sw', null);   // no session, ?lang=sw
+$itSwSticky   = $itProbe(null, 'sw');   // session=sw, no ?lang → persists
+$itInvalidSw  = $itProbe('fr', 'sw');   // invalid code ignored → session sw
+$itInvalidEn  = $itProbe('fr', 'en');   // invalid code ignored → session en
+$seoHtmlLang = function (string $html): ?string {
+    return preg_match('~<html lang="([^"]+)"~', $html, $m) ? $m[1] : null;
+};
+ok($seoHtmlLang($itEnFromSw) === 'en-KE'
+    && $seoTitle($itEnFromSw) === $seoTitle($seoHtml['/it-support?lang=en'])
+    && ($seoCanon($itEnFromSw) ?? '') === 'https://www.harrisonmuhoro.me/it-support?lang=en',
+    '?lang=en overrides a stale Kiswahili session (lang attr, title, canonical)');
+ok($seoHtmlLang($itSwFromEn) === 'sw-KE'
+    && $seoTitle($itSwFromEn) === $seoTitle($seoHtml['/it-support?lang=sw'])
+    && ($seoCanon($itSwFromEn) ?? '') === 'https://www.harrisonmuhoro.me/it-support?lang=sw',
+    '?lang=sw overrides a stale English session (lang attr, title, canonical)');
+ok($seoHtmlLang($itEnFresh) === 'en-KE' && $seoHtmlLang($itSwFresh) === 'sw-KE',
+    'fresh sessions render the requested language');
+ok($seoHtmlLang($itSwSticky) === 'sw-KE'
+    && $seoTitle($itSwSticky) === $seoTitle($seoHtml['/it-support?lang=sw']),
+    'session language persists when no ?lang is given');
+ok($seoHtmlLang($itInvalidSw) === 'sw-KE' && $seoHtmlLang($itInvalidEn) === 'en-KE',
+    'invalid ?lang codes are ignored (session fallback preserved)');
+
+// OG / Twitter parity: social metadata must mirror the page's own
+// title, description and canonical on every route.
+$ogTwitterOk = true;
+foreach ($seoHtml as $h) {
+    $t = $seoTitle($h); $d = $seoDesc($h); $c = $seoCanon($h);
+    foreach ([
+        '~<meta property="og:title"\s+content="([^"]*)"~'       => $t,
+        '~<meta property="og:description"\s+content="([^"]*)"~' => $d,
+        '~<meta property="og:url"\s+content="([^"]*)"~'         => $c,
+        '~<meta name="twitter:title"\s+content="([^"]*)"~'      => $t,
+        '~<meta name="twitter:description"\s+content="([^"]*)"~'=> $d,
+        '~<meta name="twitter:url"\s+content="([^"]*)"~'        => $c,
+    ] as $pattern => $expected) {
+        if (!preg_match($pattern, $h, $m) || html_entity_decode($m[1]) !== $expected) {
+            $ogTwitterOk = false;
+        }
+    }
+}
+ok($ogTwitterOk, 'OG and Twitter metadata agree with title/description/canonical on every route');
+
 // Person entity: one canonical @id, approved sameAs only.
 $homeLd = $seoLd($seoHtml['/']);
 $people = [];
@@ -809,6 +864,26 @@ ok(count($itServices) === 1
     && ($itServices[0]['provider']['@id'] ?? '') === 'https://www.harrisonmuhoro.me/#person',
     'IT Support Service.provider references the canonical Person @id');
 
+// Person consistency across every route: identical @id, identical name,
+// and never more than one Person node per page.
+$personIds = $personNames = [];
+foreach ($seoHtml as $uri => $h) {
+    $found = 0;
+    foreach ($seoLd($h) as $node) {
+        if (($node['@type'] ?? '') === 'Person') {
+            $found++;
+            $personIds[$uri]   = $node['@id']   ?? null;
+            $personNames[$uri] = $node['name'] ?? null;
+        }
+    }
+    if ($found > 1) { $personIds[$uri] = 'DUPLICATE'; }
+}
+ok($personIds !== [] && count(array_unique($personIds)) === 1
+    && reset($personIds) === 'https://www.harrisonmuhoro.me/#person',
+    'Person @id is identical on every page that emits it');
+ok(count(array_unique($personNames)) === 1 && reset($personNames) === 'Harrison Muhoro',
+    'Person name is consistent on every page');
+
 // Every emitted JSON-LD block must be valid JSON (XSS/encoding safety).
 $badJson = 0;
 foreach ($seoHtml as $h) {
@@ -819,25 +894,50 @@ foreach ($seoHtml as $h) {
 }
 ok($badJson === 0, 'all JSON-LD blocks are valid JSON');
 
-// Sitemap: valid XML-ish, canonical host, both languages, real images.
+// Sitemap: parse with DOMDocument — well-formedness, namespaces, host,
+// uniqueness, image assets and lastmod format are all verified structurally.
 $sitemap = page_probe(['page' => 'sitemap.xml.php', 'uri' => '/sitemap.xml', 'host' => 'www.harrisonmuhoro.me']);
-ok(str_contains($sitemap, '<urlset') && str_contains($sitemap, '</urlset>'), 'sitemap emits a urlset');
-ok(str_contains($sitemap, 'https://www.harrisonmuhoro.me/it-support?lang=en')
-    && str_contains($sitemap, 'https://www.harrisonmuhoro.me/it-support?lang=sw'),
-    'sitemap lists both IT Support language URLs');
-ok(!str_contains($sitemap, 'harrisonmuhoro.me/it-support<') && substr_count($sitemap, '/it-support') >= 2,
-    'sitemap has no bare duplicate /it-support entry');
-$imgLocs = [];
-preg_match_all('~<image:loc>(.*?)</image:loc>~', $sitemap, $im);
-foreach (($im[1] ?? []) as $loc) {
-    $imgLocs[] = html_entity_decode($loc);
+libxml_use_internal_errors(true);
+$sitemapDom = new DOMDocument();
+$sitemapParsed = $sitemapDom->loadXML($sitemap);
+libxml_clear_errors();
+ok($sitemapParsed === true, 'sitemap is well-formed XML (DOMDocument)');
+$sitemapUrls = [];
+$sitemapImgs = [];
+if ($sitemapParsed) {
+    $xp = new DOMXPath($sitemapDom);
+    $xp->registerNamespace('sm', 'http://www.sitemaps.org/schemas/sitemap/0.9');
+    $xp->registerNamespace('image', 'http://www.google.com/schemas/sitemap-image/1.1');
+    foreach ($xp->query('//sm:url') ?: [] as $urlNode) {
+        $loc = $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'loc')->item(0);
+        $mod = $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'lastmod')->item(0);
+        if ($loc) { $sitemapUrls[] = $loc->textContent; }
+        if ($mod && !preg_match('/^\d{4}-\d{2}-\d{2}$/', trim($mod->textContent))) {
+            $sitemapUrls[] = 'BAD_LASTMOD:' . $mod->textContent;
+        }
+        foreach ($xp->query('.//image:image/image:loc', $urlNode) ?: [] as $imgLoc) {
+            $sitemapImgs[] = $imgLoc->textContent;
+        }
+    }
 }
-$imgOk = $imgLocs !== [];
-foreach ($imgLocs as $loc) {
-    $path = parse_url($loc, PHP_URL_PATH);
+ok(count($sitemapUrls) > 0, 'sitemap parses to at least one <url> in the sitemap namespace');
+ok(count($sitemapUrls) === count(array_unique($sitemapUrls)), 'sitemap contains no duplicate <loc> URLs');
+$allCanonicalHost = $sitemapUrls !== [];
+foreach ($sitemapUrls as $u) {
+    if (str_starts_with($u, 'BAD_LASTMOD:') || !str_starts_with($u, 'https://www.harrisonmuhoro.me')) { $allCanonicalHost = false; }
+}
+ok($allCanonicalHost, 'every sitemap <loc> uses https://www.harrisonmuhoro.me and valid YYYY-MM-DD lastmod');
+ok(in_array('https://www.harrisonmuhoro.me/it-support?lang=en', $sitemapUrls, true)
+    && in_array('https://www.harrisonmuhoro.me/it-support?lang=sw', $sitemapUrls, true),
+    'sitemap lists both IT Support language URLs');
+ok(!in_array('https://www.harrisonmuhoro.me/it-support', $sitemapUrls, true),
+    'sitemap has no bare /it-support entry');
+$imgOk = $sitemapImgs !== [];
+foreach ($sitemapImgs as $loc) {
+    $path = parse_url(html_entity_decode($loc), PHP_URL_PATH);
     if ($path === null || !is_file(PROJECT_ROOT . $path)) { $imgOk = false; }
 }
-ok($imgOk, 'every sitemap image URL maps to an existing file (' . count($imgLocs) . ' images)');
+ok($imgOk, 'every sitemap <image:loc> maps to an existing file (' . count($sitemapImgs) . ' images)');
 
 // Explicit cleanup before exit (shutdown function is the backup).
 stop_stub($server, $nullFile);

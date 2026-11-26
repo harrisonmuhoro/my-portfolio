@@ -3,7 +3,7 @@
 **Repository:** `harrisonmuhoro/my-portfolio` · **Branch:** `main` · **Audited commit:** `77500c2` (+ working-tree state at audit time)
 **Method:** static inspection of the repository plus live HTTP checks against `https://www.harrisonmuhoro.me` (all production observations below were actually executed via `curl`; nothing is assumed).
 
-> **Phase 1 status update:** findings **F1, F2, F4, F5, F8, F10 are resolved** in code (see `docs/SEO_PHASE_1_IMPLEMENTATION.md`; 20 new automated assertions in `tests/run_tests.php`). **F3** (edge 307 redirect) remains a hosting-config issue; **F6** (unconditional session), **F7** (credential verification) and **F9** (duplicate robots.txt sources) remain open.
+> **Phase 1 status update:** findings **F1, F2, F4, F5, F8, F10 are resolved** in code (see `docs/SEO_PHASE_1_IMPLEMENTATION.md`; automated assertions in `tests/run_tests.php`). **Phase 1B verification** (`docs/SEO_PHASE_1B_VERIFICATION.md`) hardened the suite to 94 assertions — DOMDocument sitemap validation, language-session isolation, OG/Twitter parity, cross-page Person consistency — with no application-code defects found. **F3** (edge 307 redirect) remains a hosting-config issue; **F6** (unconditional session), **F7** (credential verification) and **F9** (duplicate robots.txt sources) remain open.
 
 ---
 
