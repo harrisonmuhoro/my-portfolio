@@ -75,9 +75,9 @@ function t(string $key, ?string $lang = null): string {
                 'svc_network_desc'   => 'LAN and WAN setup, wired and wireless networking, Wi-Fi and Ethernet cabling, network sharing, and connectivity troubleshooting for homes and offices.',
                 'svc_network_items'  => 'LAN / WAN setup · Wi-Fi & Ethernet cabling · Home & office networking · Connectivity troubleshooting',
 
-                'svc_trouble_title'  => 'Computer troubleshooting',
-                'svc_trouble_desc'   => 'Windows installation, hardware diagnosis, RAM and HDD/SSD issues, boot problems, drivers, and performance optimisation for desktop and laptop computers.',
-                'svc_trouble_items'  => 'Windows install & repair · RAM / HDD / SSD diagnostics · Boot & driver issues · Speed & performance tuning',
+                'svc_troubleshoot_title'  => 'Computer troubleshooting',
+                'svc_troubleshoot_desc'   => 'Windows installation, hardware diagnosis, RAM and HDD/SSD issues, boot problems, drivers, and performance optimisation for desktop and laptop computers.',
+                'svc_troubleshoot_items'  => 'Windows install & repair · RAM / HDD / SSD diagnostics · Boot & driver issues · Speed & performance tuning',
 
                 'svc_software_title' => 'Software & IT support',
                 'svc_software_desc'  => 'Software installation, operating system errors, malware removal, data backup and recovery, user account setup, and routine maintenance.',
@@ -173,9 +173,9 @@ function t(string $key, ?string $lang = null): string {
                 'svc_network_desc'   => 'Usanidi wa LAN na WAN, mitandao ya waya na isiyo ya waya, waya za Wi-Fi na Ethernet, kushiriki mtandao, na utatuzi wa matatizo ya muunganisho kwa kaya na ofisi.',
                 'svc_network_items'  => 'Usanidi wa LAN / WAN · Waya za Wi-Fi na Ethernet · Mitandao ya nyumbani na ofisini · Utatuzi wa muunganisho',
 
-                'svc_trouble_title'  => 'Utatuzi wa matatizo ya kompyuta',
-                'svc_trouble_desc'   => 'Usanidi wa Windows, utambuzi wa hitilafu za vifaa, matatizo ya RAM na HDD/SSD, matatizo ya kuanza (boot), madereva, na kuboresha utendaji wa kompyuta za mezani na laptop.',
-                'svc_trouble_items'  => 'Usanidi na ukarabati wa Windows · Utambuzi wa RAM / HDD / SSD · Matatizo ya boot na madereva · Kuongeza kasi na utendaji',
+                'svc_troubleshoot_title'  => 'Utatuzi wa matatizo ya kompyuta',
+                'svc_troubleshoot_desc'   => 'Usanidi wa Windows, utambuzi wa hitilafu za vifaa, matatizo ya RAM na HDD/SSD, matatizo ya kuanza (boot), madereva, na kuboresha utendaji wa kompyuta za mezani na laptop.',
+                'svc_troubleshoot_items'  => 'Usanidi na ukarabati wa Windows · Utambuzi wa RAM / HDD / SSD · Matatizo ya boot na madereva · Kuongeza kasi na utendaji',
 
                 'svc_software_title' => 'Msaada wa programu na IT',
                 'svc_software_desc'  => 'Usanidi wa programu, makosa ya mfumo wa uendeshaji, kuondoa malware, nakala na urejesho wa data, usanidi wa akaunti za watumiaji, na matengenezo ya kawaida.',
