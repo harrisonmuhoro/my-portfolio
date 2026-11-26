@@ -5,14 +5,27 @@
  * Local overrides go in config/config.local.php (gitignored).
  */
 
-// ─── ENVIRONMENT ──────────────────────────────────────────────────────────────
-$_is_local = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']);
-define('ENVIRONMENT', getenv('APP_ENV') ?: ($_is_local ? 'development' : 'production'));
-define('DEBUG_MODE', ENVIRONMENT === 'development');
-
 // ─── PROJECT ROOT ─────────────────────────────────────────────────────────────
 if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', realpath(__DIR__ . '/..'));
+}
+
+// ─── LOCAL OVERRIDES (never committed) ────────────────────────────────────────
+// Loaded BEFORE the defaults below so config.local.php values win.
+// Create config/config.local.php on WAMP for local-only values.
+$_local = __DIR__ . '/config.local.php';
+if (file_exists($_local)) {
+    require_once $_local;
+}
+unset($_local);
+
+// ─── ENVIRONMENT ──────────────────────────────────────────────────────────────
+$_is_local = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']);
+if (!defined('ENVIRONMENT')) {
+    define('ENVIRONMENT', getenv('APP_ENV') ?: ($_is_local ? 'development' : 'production'));
+}
+if (!defined('DEBUG_MODE')) {
+    define('DEBUG_MODE', ENVIRONMENT === 'development');
 }
 
 // ─── BASE PATH (Wasmer-safe) ───────────────────────────────────────────────────
@@ -81,16 +94,16 @@ define('SOCIAL_LINKS', [
 define('CV_PATH', SITE_URL . '/assets/docs/Harrison_Muhoro_Resume.pdf#toolbar=0&navpanes=0');
 
 // ─── DATABASE ─────────────────────────────────────────────────────────────────
-define('DB_HOST',    getenv('DB_HOST')    ?: 'localhost');
-define('DB_NAME',    getenv('DB_NAME')    ?: 'portfolio_db');
-define('DB_USER',    getenv('DB_USER')    ?: 'portfolio_user');
-define('DB_PASS',    getenv('DB_PASS')    ?: '');
+if (!defined('DB_HOST'))    define('DB_HOST',    getenv('DB_HOST')    ?: 'localhost');
+if (!defined('DB_NAME'))    define('DB_NAME',    getenv('DB_NAME')    ?: 'portfolio_db');
+if (!defined('DB_USER'))    define('DB_USER',    getenv('DB_USER')    ?: 'portfolio_user');
+if (!defined('DB_PASS'))    define('DB_PASS',    getenv('DB_PASS')    ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
 // ─── MAILER (Resend) ──────────────────────────────────────────────────────────
-define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
-define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
-define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionh191@gmail.com');
+if (!defined('RESEND_API_KEY')) define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
+if (!defined('MAIL_FROM'))      define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
+if (!defined('MAIL_TO'))        define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionh191@gmail.com');
 
 // ─── SEO ──────────────────────────────────────────────────────────────────────
 define('SEO_KEYWORDS',   'Web Developer Kenya, PHP Developer Kenya, Full-Stack Developer Kenya, Website Developer Nyeri, Business System Developer Kenya, Harrison Muhoro');
@@ -108,7 +121,9 @@ define('IT_SUPPORT_LANGS',      ['en', 'sw']);
 
 // ─── SECURITY ─────────────────────────────────────────────────────────────────
 define('CSRF_TOKEN_NAME', 'csrf_token');
-define('APP_SECRET',      getenv('APP_SECRET') ?: 'fallback-change-in-production');
+if (!defined('APP_SECRET')) {
+    define('APP_SECRET', getenv('APP_SECRET') ?: 'fallback-change-in-production');
+}
 define('FORM_RATE_LIMIT', 3);
 define('ALLOWED_FILE_TYPES', []);
 
@@ -126,10 +141,4 @@ if (DEBUG_MODE) {
 // ─── TIMEZONE ─────────────────────────────────────────────────────────────────
 date_default_timezone_set('Africa/Nairobi');
 
-// ─── LOCAL OVERRIDES (never committed) ────────────────────────────────────────
-// Create config/config.local.php on WAMP for local-only values.
-$_local = __DIR__ . '/config.local.php';
-if (file_exists($_local)) {
-    require_once $_local;
-}
-unset($_local, $_is_local);
+unset($_is_local);

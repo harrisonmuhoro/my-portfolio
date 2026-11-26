@@ -10,6 +10,12 @@ $page_title       = $page_title       ?? SITE_NAME . ' — ' . PRIMARY_TITLE;
 $page_description = $page_description ?? SITE_DESCRIPTION;
 $seo_keywords     = $seo_keywords     ?? SEO_KEYWORDS;
 
+// Active UI language (set by includes/i18n.php on bilingual pages).
+// Anything outside the allowlist falls back to English.
+$page_lang  = $page_lang ?? (isset($lang) && in_array($lang, ['en', 'sw'], true) ? $lang : 'en');
+$html_lang  = $page_lang === 'sw' ? 'sw-KE' : SITE_LANGUAGE;
+$og_locale  = $page_lang === 'sw' ? 'sw_KE' : SITE_LOCALE;
+
 // Clean REQUEST_URI — strip query strings from canonical
 $clean_uri        = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
 if (BASE_PATH !== '' && strpos($clean_uri, BASE_PATH) === 0) {
@@ -23,7 +29,7 @@ $page_og_image    = $page_og_image    ?? OG_IMAGE;
 $base = rtrim(BASE_PATH, '/');
 ?>
 <!DOCTYPE html>
-<html lang="<?= htmlspecialchars(SITE_LANGUAGE) ?>" dir="ltr">
+<html lang="<?= htmlspecialchars($html_lang) ?>" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,7 +50,7 @@ $base = rtrim(BASE_PATH, '/');
     <meta property="og:title"       content="<?= htmlspecialchars($page_title) ?>">
     <meta property="og:description" content="<?= htmlspecialchars($page_description) ?>">
     <meta property="og:image"       content="<?= htmlspecialchars($page_og_image) ?>">
-    <meta property="og:locale"      content="<?= htmlspecialchars(SITE_LOCALE) ?>">
+    <meta property="og:locale"      content="<?= htmlspecialchars($og_locale) ?>">
     <meta property="og:site_name"   content="<?= htmlspecialchars(SITE_NAME) ?>">
 
     <!-- ── Twitter Card ── -->

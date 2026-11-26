@@ -3,6 +3,7 @@
  * footer.php — Colophon
  */
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/i18n.php';
 ?>
 <footer class="footer reveal" role="contentinfo">
     <div class="container footer__container">
@@ -10,24 +11,24 @@ require_once __DIR__ . '/../config/config.php';
         <div class="footer__top">
             <div class="footer__brand">
                 <a href="<?= BASE_PATH ?>/" class="footer__logo"><?= OWNER_NAME ?></a>
-                <p class="footer__tagline">Software engineer building dependable systems in Nyeri, Kenya.</p>
+                <p class="footer__tagline"><?= htmlspecialchars(t('footer_tagline')) ?></p>
             </div>
 
             <nav class="footer__nav" aria-label="Footer Navigation">
                 <ul role="list">
-                    <li><a href="<?= BASE_PATH ?>/#work">Work</a></li>
-                    <li><a href="<?= BASE_PATH ?>/about">About</a></li>
-                    <li><a href="<?= BASE_PATH ?>/projects">Projects</a></li>
-                    <li><a href="<?= BASE_PATH ?>/services">Services</a></li>
-                    <li><a href="<?= BASE_PATH ?>/it-support">IT Support</a></li>
-                    <li><a href="<?= BASE_PATH ?>/contact">Contact</a></li>
+                    <li><a href="<?= BASE_PATH ?>/#work"><?= htmlspecialchars(t('nav_work')) ?></a></li>
+                    <li><a href="<?= BASE_PATH ?>/about"><?= htmlspecialchars(t('nav_about')) ?></a></li>
+                    <li><a href="<?= BASE_PATH ?>/projects"><?= htmlspecialchars(t('nav_projects')) ?></a></li>
+                    <li><a href="<?= BASE_PATH ?>/services"><?= htmlspecialchars(t('nav_services')) ?></a></li>
+                    <li><a href="<?= BASE_PATH ?>/it-support"><?= htmlspecialchars(t('nav_it_support')) ?></a></li>
+                    <li><a href="<?= BASE_PATH ?>/contact"><?= htmlspecialchars(t('nav_contact')) ?></a></li>
                 </ul>
             </nav>
         </div>
 
         <div class="footer__bottom">
             <p class="footer__copy">&copy; <?= date('Y') ?> <?= OWNER_NAME ?></p>
-            <p class="footer__location">Nyeri, Kenya</p>
+            <p class="footer__location"><?= htmlspecialchars(t('footer_location')) ?></p>
         </div>
 
     </div>

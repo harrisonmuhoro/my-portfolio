@@ -51,17 +51,17 @@ function t(string $key, ?string $lang = null): string {
             'en' => [
                 // ── Meta / SEO ──
                 'meta_title'       => 'IT Support & Networking Services in Nyeri, Kenya | Harrison Muhoro',
-                'meta_desc'        => 'Professional IT support and computer networking services in Nyeri and surrounds. LAN & Wi-Fi installation, Windows troubleshooting, malware removal, backups, and small business IT support. On-site or remote. Request a free quotation.',
+                'meta_desc'        => 'Professional IT support and computer networking services in Nyeri and surrounds. LAN & Wi-Fi installation, Windows troubleshooting, malware removal, backups, and small business IT support. On-site or remote. Request a quotation.',
                 'meta_keywords'    => 'IT support Nyeri, computer repair Nyeri, network installation Kenya, WiFi setup Nyeri, computer troubleshooting Kenya, business IT support Nyeri, laptop repair Nyeri, tech support Kenya',
 
                 // ── Hero ──
                 'hero_label'       => 'IT Support & Networking',
                 'hero_title'       => 'IT support that comes to you.',
-                'hero_sub'         => 'Fast, honest help with computers, networks, and business IT — on-site around Nyeri or remotely anywhere in Kenya. Two years of hands-on experience, priced by quotation.',
+                'hero_sub'         => 'Fast, honest help with computers, networks, and business IT — on-site around Nyeri or remotely where there is an internet connection. Two years of hands-on experience, priced by quotation.',
                 'badge_area'       => 'Nyeri & surrounding areas',
                 'badge_methods'    => 'On-site & remote support',
                 'badge_exp'        => '2 years experience',
-                'badge_quote'      => 'Free quotation on request',
+                'badge_quote'      => 'Quotation-based pricing',
                 'badge_lang'       => 'English & Kiswahili',
                 'cta_quote'        => 'Request a quotation',
                 'cta_whatsapp'     => 'Chat on WhatsApp',
@@ -99,15 +99,15 @@ function t(string $key, ?string $lang = null): string {
                 'del3_desc'        => 'On-site visits around Nyeri and surrounds, or remote support wherever an internet connection reaches.',
                 'del_note'         => 'Support is for individuals and businesses. I handle everyday IT — if your issue needs specialist equipment or advanced infrastructure work, I will tell you honestly rather than guess.',
                 'del_scope_title'  => 'Coverage',
-                'del_scope_area'   => 'Nyeri town and surrounding areas (on-site). Remote support available countrywide.',
+                'del_scope_area'   => 'Nyeri town and surrounding areas (on-site). Remote support available where there is an internet connection.',
                 'del_scope_price'  => 'Pricing',
-                'del_scope_quote'  => 'Every job is quoted individually after assessment — request yours free of charge.',
+                'del_scope_quote'  => 'Every job is quoted individually after assessment — request a quotation using the form below.',
                 'del_scope_langs'  => 'Languages',
                 'del_scope_langlist' => 'English and Kiswahili',
 
                 // ── Form ──
                 'form_title'       => 'Request your quotation',
-                'form_sub'         => 'Fill this in and I will get back to you — usually within a day.',
+                'form_sub'         => 'Fill this in and I will get back to you.',
                 'f_name'           => 'Full name',
                 'f_phone'          => 'Phone / WhatsApp',
                 'f_email'          => 'Email (optional)',
@@ -138,6 +138,7 @@ function t(string $key, ?string $lang = null): string {
                 'err_method'       => 'Please choose a support method.',
                 'err_location'     => 'Please tell me the location for your on-site visit.',
                 'err_description'  => 'Please describe the problem (at least 20 characters).',
+                'err_date'         => 'Please enter a valid appointment date that is today or later.',
                 'err_generic'      => 'Something went wrong. Please try again or contact me directly.',
                 'err_server'       => 'Server error. Please try again.',
 
@@ -147,6 +148,17 @@ function t(string $key, ?string $lang = null): string {
 
                 // ── Lang switch ──
                 'lang_switch'      => 'Lugha / Language',
+
+                // ── Shared chrome (nav / footer) ──
+                'nav_work'         => 'Work',
+                'nav_about'        => 'About',
+                'nav_projects'     => 'Projects',
+                'nav_it_support'   => 'IT Support',
+                'nav_services'     => 'Services',
+                'nav_contact'      => 'Contact',
+                'nav_cv'           => 'CV',
+                'footer_tagline'   => 'Software engineer building dependable systems in Nyeri, Kenya.',
+                'footer_location'  => 'Nyeri, Kenya',
             ],
 
             'sw' => [
@@ -156,11 +168,11 @@ function t(string $key, ?string $lang = null): string {
 
                 'hero_label'       => 'Msaada wa IT na Mtandao',
                 'hero_title'       => 'Msaada wa IT unaokuja kwako.',
-                'hero_sub'         => 'Msaada wa haraka na wa kuaminika kwa kompyuta, mitandao na IT ya biashara — kwenye eneo la Nyeri na mabonde au mbali popote Kenya. Uzoefu wa miaka miwili, bei kwa nukuu.',
+                'hero_sub'         => 'Msaada wa haraka na wa kuaminika kwa kompyuta, mitandao na IT ya biashara — kwenye eneo la Nyeri na mabonde au mbali popote penye muunganisho wa intaneti. Uzoefu wa miaka miwili, bei kwa nukuu.',
                 'badge_area'       => 'Nyeri na maeneo ya karibu',
                 'badge_methods'    => 'Huduma ya eneo na mbali',
                 'badge_exp'        => 'Uzoefu wa miaka miwili',
-                'badge_quote'      => 'Nukuu ya bei bure ukihitaji',
+                'badge_quote'      => 'Bei kwa nukuu',
                 'badge_lang'       => 'Kiingereza na Kiswahili',
                 'cta_quote'        => 'Omba nukuu ya bei',
                 'cta_whatsapp'     => 'Ongea WhatsApp',
@@ -196,14 +208,14 @@ function t(string $key, ?string $lang = null): string {
                 'del3_desc'        => 'Ziara za eneo la Nyeri na mabonde yake, au msaada wa mbali popote penye muunganisho wa intaneti.',
                 'del_note'         => 'Msaada ni kwa watu binafsi na biashara. Naushughulikia IT ya kila siku — kama tatizo lako linahitaji vifaa maalum au kazi ya miundombinu ya hali ya juu, nitakuambia kwa uaminifu badala ya kubahatisha.',
                 'del_scope_title'  => 'Eneo na masharti',
-                'del_scope_area'   => 'Mji wa Nyeri na maeneo ya karibu (kwenye eneo). Msaada wa mbali upatikana nchini kote.',
+                'del_scope_area'   => 'Mji wa Nyeri na maeneo ya karibu (kwenye eneo). Msaada wa mbali upatikana popote penye muunganisho wa intaneti.',
                 'del_scope_price'  => 'Bei',
-                'del_scope_quote'  => 'Kila kazi hutathiliwa na kupewa nukuu yake — omba yako bure.',
+                'del_scope_quote'  => 'Kila kazi hupimwa na kupewa nukuu yake — omba nukuu kwa kutumia fomu hapa chini.',
                 'del_scope_langs'  => 'Lugha',
                 'del_scope_langlist' => 'Kiingereza na Kiswahili',
 
                 'form_title'       => 'Omba nukuu ya bei',
-                'form_sub'         => 'Jaza fomu hii nitakujibu — kwa kawaida ndani ya siku moja.',
+                'form_sub'         => 'Jaza fomu hii nitakujibu.',
                 'f_name'           => 'Jina kamili',
                 'f_phone'          => 'Simu / WhatsApp',
                 'f_email'          => 'Barua pepe (hiari)',
@@ -234,6 +246,7 @@ function t(string $key, ?string $lang = null): string {
                 'err_method'       => 'Tafadhali chagua njia ya msaada.',
                 'err_location'     => 'Tafadhali niambie eneo la ziara yako.',
                 'err_description'  => 'Tafadhali eleza tatizo (angalau herufi 20).',
+                'err_date'         => 'Tafadhali weka tarehe sahihi ya miadi — leo au baadaye.',
                 'err_generic'      => 'Hitilafu imetokea. Tafadhali jaribu tena au niwasiliane nami moja kwa moja.',
                 'err_server'       => 'Hitilafu ya seva. Tafadhali jaribu tena.',
 
@@ -241,6 +254,17 @@ function t(string $key, ?string $lang = null): string {
                 'wa_text'          => 'Habari Harrison, nimekutafuta ukurasa wako wa msaada wa IT na ninahitaji msaada wa kompyuta / mitandao. Ningependa nukuu ya bei. Tafadhali niambie. Asante.',
 
                 'lang_switch'      => 'Lugha / Language',
+
+                // ── Shared chrome (nav / footer) ──
+                'nav_work'         => 'Kazi',
+                'nav_about'        => 'Kuhusu',
+                'nav_projects'     => 'Miradi',
+                'nav_it_support'   => 'Msaada wa IT',
+                'nav_services'     => 'Huduma za Programu',
+                'nav_contact'      => 'Mawasiliano',
+                'nav_cv'           => 'CV',
+                'footer_tagline'   => 'Mhandisi wa programu anayejenga mifumo thabiti Nyeri, Kenya.',
+                'footer_location'  => 'Nyeri, Kenya',
             ],
         ];
     }

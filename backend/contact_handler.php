@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/rate_limiter.php';
+require_once __DIR__ . '/mailer.php';
 
 // ── Response helper ─────────────────────────────────────────
 function json_response(bool $success, string $message, int $http_code = 200): void {
@@ -32,18 +34,12 @@ if (!empty($_POST['website'])) {
     json_response(true, 'Message sent successfully!');
 }
 
-// ── Rate Limiting (session-based) ────────────────────────────
-$rate_key      = 'contact_submissions';
-$rate_window   = 3600; // 1 hour in seconds
-$now           = time();
+// ── Rate Limiting (shared server-side store, IP-keyed) ──────
+$rate_window = 3600; // 1 hour in seconds
+$retry_after = rate_limit_hit(rl_client_key('contact'), FORM_RATE_LIMIT, $rate_window);
 
-$_SESSION[$rate_key] = $_SESSION[$rate_key] ?? ['count' => 0, 'window_start' => $now];
-
-if (($now - $_SESSION[$rate_key]['window_start']) > $rate_window) {
-    $_SESSION[$rate_key] = ['count' => 0, 'window_start' => $now];
-}
-
-if ($_SESSION[$rate_key]['count'] >= FORM_RATE_LIMIT) {
+if ($retry_after > 0) {
+    header('Retry-After: ' . $retry_after);
     json_response(false, 'Too many submissions. Please try again in an hour.', 429);
 }
 
@@ -133,37 +129,14 @@ $email_body .= $message . "\n\n";
 $email_body .= str_repeat('─', 50) . "\n";
 $email_body .= "Reply directly to: " . $email . "\n";
 
-// ── Headers — prevent injection by using sanitized values ────
-// Use a domain-relative From address to improve deliverability
-$host         = $_SERVER['HTTP_HOST'] ?? 'harrisonmuhoro.me';
-$from_email   = 'no-reply@' . $host;
-$from_name    = preg_replace('/[^a-zA-Z0-9 \-_]/', '', $name);
-
-$headers   = [];
-$headers[] = "From: Portfolio Contact <" . $from_email . ">";
-$headers[] = "Reply-To: " . $from_name . " <" . $email . ">";
-$headers[] = "X-Mailer: PHP/" . phpversion();
-$headers[] = "MIME-Version: 1.0";
-$headers[] = "Content-Type: text/plain; charset=UTF-8";
-
-// ── Send email ───────────────────────────────────────────────
-// We use the -f flag to set the envelope sender, which helps avoid spam filters
-$sent = mail(EMAIL_ADDRESS, $email_subject, $email_body, implode("\r\n", $headers), "-f" . $from_email);
+// ── Send email via configured provider (Resend → mail() fallback) ──
+$sent = portfolio_send_mail($email_subject, $email_body, $email, $name);
 
 if ($sent) {
-    // Increment rate limit counter
-    $_SESSION[$rate_key]['count']++;
-
     // Regenerate CSRF token after successful submission
     $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
 
     json_response(true, 'Message sent successfully! I will get back to you within 24 hours.');
 } else {
-    // Log failure in production
-    if (ENVIRONMENT === 'production') {
-        error_log('[ContactHandler] mail() failed for: ' . $email . ' at ' . date('Y-m-d H:i:s'));
-    }
-    // Return a 200 with success:false instead of a 500 to avoid scary browser console errors
-    // but clearly indicate failure to the user.
     json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 200);
 }

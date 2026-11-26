@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/i18n.php';
+require_once __DIR__ . '/rate_limiter.php';
+require_once __DIR__ . '/mailer.php';
 
 // ── Response helper ─────────────────────────────────────────
 function json_response(bool $success, string $message, int $http_code = 200): void {
@@ -33,18 +35,12 @@ if (!empty($_POST['website'])) {
     json_response(true, t('f_success'));
 }
 
-// ── Rate Limiting (session-based) ────────────────────────────
-$rate_key    = 'it_support_submissions';
+// ── Rate Limiting (shared server-side store, IP-keyed) ──────
 $rate_window = 3600; // 1 hour in seconds
-$now         = time();
+$retry_after = rate_limit_hit(rl_client_key('it_support'), FORM_RATE_LIMIT, $rate_window);
 
-$_SESSION[$rate_key] = $_SESSION[$rate_key] ?? ['count' => 0, 'window_start' => $now];
-
-if (($now - $_SESSION[$rate_key]['window_start']) > $rate_window) {
-    $_SESSION[$rate_key] = ['count' => 0, 'window_start' => $now];
-}
-
-if ($_SESSION[$rate_key]['count'] >= FORM_RATE_LIMIT) {
+if ($retry_after > 0) {
+    header('Retry-After: ' . $retry_after);
     json_response(false, t('err_generic'), 429);
 }
 
@@ -124,7 +120,7 @@ if (mb_strlen($description) < 20 || mb_strlen($description) > 3000) {
 if ($date !== '') {
     $d = DateTime::createFromFormat('Y-m-d', $date);
     if (!$d || $d->format('Y-m-d') !== $date || $date < date('Y-m-d')) {
-        $date = ''; // silently drop an invalid/past date rather than block the enquiry
+        $errors[] = t('err_date', $request_lang);
     }
 }
 
@@ -172,33 +168,14 @@ $email_body .= "DESCRIPTION\n";
 $email_body .= str_repeat('─', 50) . "\n";
 $email_body .= $description . "\n";
 
-// ── Headers — prevent injection by using sanitized values ────
-$host       = $_SERVER['HTTP_HOST'] ?? 'harrisonmuhoro.me';
-$from_email = 'no-reply@' . $host;
-$from_name  = preg_replace('/[^a-zA-Z0-9 \-_]/', '', $name);
-
-$headers   = [];
-$headers[] = "From: IT Support Enquiries <" . $from_email . ">";
-if ($email !== '') {
-    $headers[] = "Reply-To: " . $from_name . " <" . $email . ">";
-} else {
-    $headers[] = "Reply-To: " . $from_name . " <" . $from_email . ">";
-}
-$headers[] = "X-Mailer: PHP/" . phpversion();
-$headers[] = "MIME-Version: 1.0";
-$headers[] = "Content-Type: text/plain; charset=UTF-8";
-
-// ── Send email ───────────────────────────────────────────────
-$sent = mail(EMAIL_ADDRESS, $email_subject, $email_body, implode("\r\n", $headers), "-f" . $from_email);
+// ── Send email via configured provider (Resend → mail() fallback) ──
+$sent = portfolio_send_mail($email_subject, $email_body, $email, $name);
 
 if ($sent) {
-    $_SESSION[$rate_key]['count']++;
+    // Regenerate CSRF token after successful submission
     $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
 
     json_response(true, t('f_success', $request_lang));
 } else {
-    if (ENVIRONMENT === 'production') {
-        error_log('[ITSupportHandler] mail() failed for: ' . $phone . ' at ' . date('Y-m-d H:i:s'));
-    }
     json_response(false, t('err_server', $request_lang), 200);
 }

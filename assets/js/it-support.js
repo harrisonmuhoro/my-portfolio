@@ -1,6 +1,9 @@
 /**
  * it-support.js — Enquiry form validation, conditional location field,
  * WhatsApp deep-link switching, and AJAX submission.
+ *
+ * Validation is field-level: each field is checked on blur/change and the
+ * whole form only on submit. Errors clear as soon as a field becomes valid.
  */
 (function () {
     'use strict';
@@ -21,13 +24,17 @@
     var langSel     = document.getElementById('its-lang');
     var waLink      = document.getElementById('its-wa-link');
 
-    // ── Error helpers ─────────────────────────────────────────
-    function groupOf(fieldId) {
-        return document.getElementById('group-' + fieldId);
+    function t(key) {
+        return I18N[key] || key;
     }
 
+    function el(id) {
+        return document.getElementById(id);
+    }
+
+    // ── Error helpers ─────────────────────────────────────────
     function showError(fieldId, message) {
-        var group = groupOf(fieldId);
+        var group = el('group-' + fieldId);
         if (!group) return;
         var errEl = group.querySelector('.form-error');
         var input = group.querySelector('.form-input');
@@ -37,7 +44,7 @@
     }
 
     function clearError(fieldId) {
-        var group = groupOf(fieldId);
+        var group = el('group-' + fieldId);
         if (!group) return;
         var errEl = group.querySelector('.form-error');
         var input = group.querySelector('.form-input');
@@ -46,23 +53,24 @@
         group.classList.remove('has-error');
     }
 
-    function t(key) {
-        return I18N[key] || key;
+    // ── Location is required only for on-site requests ────────
+    function isOnsite() {
+        return methodSel && methodSel.value === 'onsite';
     }
 
-    // ── Location is required only for on-site requests ────────
     function syncLocationRequirement() {
-        var onsite = methodSel && methodSel.value === 'onsite';
-        if (locationInp) {
-            locationInp.required = onsite;
-        }
-        if (locationReq) {
-            locationReq.hidden = !onsite;
-        }
+        var onsite = isOnsite();
+        if (locationInp) locationInp.required = onsite;
+        if (locationReq) locationReq.hidden = !onsite;
     }
 
     if (methodSel) {
-        methodSel.addEventListener('change', syncLocationRequirement);
+        methodSel.addEventListener('change', function () {
+            syncLocationRequirement();
+            // Re-validate both fields when the method changes.
+            validateField('method');
+            validateField('location');
+        });
         syncLocationRequirement();
     }
 
@@ -74,82 +82,89 @@
         });
     }
 
-    // ── Validation ────────────────────────────────────────────
+    // ── Per-field validators: return error message or '' ──────
+    var FIELD_IDS = ['name', 'phone', 'email', 'category', 'method', 'location', 'description', 'date'];
+    var inputId   = { name: 'its-name', phone: 'its-phone', email: 'its-email', category: 'its-category',
+                      method: 'its-method', location: 'its-location', description: 'its-description', date: 'its-date' };
+
+    var validators = {
+        name: function () {
+            var v = el('its-name');
+            return !v || v.value.trim().length >= 2 ? '' : t('err_name');
+        },
+        phone: function () {
+            var v = el('its-phone');
+            if (!v) return '';
+            var digits = v.value.replace(/[^0-9+]/g, '');
+            return (digits.length >= 9 && digits.length <= 15 && /^\+?[0-9]+$/.test(digits)) ? '' : t('err_phone');
+        },
+        email: function () {
+            var v = el('its-email');
+            var val = v ? v.value.trim() : '';
+            return val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? '' : t('err_email');
+        },
+        category: function () {
+            var v = el('its-category');
+            return v && v.value ? '' : t('err_category');
+        },
+        method: function () {
+            var v = el('its-method');
+            return v && v.value ? '' : t('err_method');
+        },
+        location: function () {
+            if (!isOnsite()) return '';
+            var v = el('its-location');
+            return v && v.value.trim().length >= 3 ? '' : t('err_location');
+        },
+        description: function () {
+            var v = el('its-description');
+            return v && v.value.trim().length >= 20 ? '' : t('err_description');
+        },
+        date: function () {
+            var v = el('its-date');
+            if (!v || v.value === '') return '';
+            var today = new Date();
+            var isoToday = today.getFullYear() + '-'
+                + String(today.getMonth() + 1).padStart(2, '0') + '-'
+                + String(today.getDate()).padStart(2, '0');
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(v.value) || v.value < isoToday) {
+                return t('err_date');
+            }
+            return '';
+        }
+    };
+
+    // Validate one field; returns true when valid.
+    function validateField(fieldId) {
+        var message = validators[fieldId] ? validators[fieldId]() : '';
+        if (message === '') {
+            clearError(fieldId);
+            return true;
+        }
+        showError(fieldId, message);
+        return false;
+    }
+
     function validateForm() {
         var valid = true;
-
-        ['name', 'phone', 'email', 'category', 'method', 'location', 'description', 'date']
-            .forEach(function (f) { clearError(f); });
-
-        var name    = document.getElementById('its-name');
-        var phone   = document.getElementById('its-phone');
-        var email   = document.getElementById('its-email');
-        var cat     = document.getElementById('its-category');
-        var method  = document.getElementById('its-method');
-        var loc     = document.getElementById('its-location');
-        var desc    = document.getElementById('its-description');
-        var date    = document.getElementById('its-date');
-
-        if (!name || name.value.trim().length < 2) {
-            showError('name', t('err_name'));
-            valid = false;
-        }
-
-        var phoneDigits = phone ? phone.value.replace(/[^0-9+]/g, '') : '';
-        if (!phone || phoneDigits.length < 9 || phoneDigits.length > 15 || !/^\+?[0-9]+$/.test(phoneDigits)) {
-            showError('phone', t('err_phone'));
-            valid = false;
-        }
-
-        var emailVal = email ? email.value.trim() : '';
-        if (emailVal !== '' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-            showError('email', t('err_email'));
-            valid = false;
-        }
-
-        if (!cat || !cat.value) {
-            showError('category', t('err_category'));
-            valid = false;
-        }
-
-        if (!method || !method.value) {
-            showError('method', t('err_method'));
-            valid = false;
-        }
-
-        var onsite = method && method.value === 'onsite';
-        if (onsite && (!loc || loc.value.trim().length < 3)) {
-            showError('location', t('err_location'));
-            valid = false;
-        }
-
-        if (!desc || desc.value.trim().length < 20) {
-            showError('description', t('err_description'));
-            valid = false;
-        }
-
-        if (date && date.value) {
-            var today = new Date();
-            var y = today.getFullYear();
-            var m = String(today.getMonth() + 1).padStart(2, '0');
-            var d = String(today.getDate()).padStart(2, '0');
-            if (date.value < y + '-' + m + '-' + d) {
-                date.value = '';
-            }
-        }
-
+        FIELD_IDS.forEach(function (f) {
+            if (!validateField(f)) valid = false;
+        });
         return valid;
     }
 
-    // ── Live validation on blur ───────────────────────────────
-    ['its-name', 'its-phone', 'its-email', 'its-category', 'its-method', 'its-location', 'its-description']
-        .forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('blur', function () { validateForm(); });
-                el.addEventListener('change', function () { validateForm(); });
+    // ── Live validation: blur validates, input clears when fixed ──
+    FIELD_IDS.forEach(function (fieldId) {
+        var input = el(inputId[fieldId]);
+        if (!input) return;
+        input.addEventListener('blur', function () { validateField(fieldId); });
+        input.addEventListener('input', function () {
+            if (el('group-' + fieldId).classList.contains('has-error')) {
+                validateField(fieldId);
             }
         });
+        input.addEventListener('change', function () { validateField(fieldId); });
+    });
 
     // ── Submit ────────────────────────────────────────────────
     form.addEventListener('submit', function (e) {

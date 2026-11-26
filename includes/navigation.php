@@ -4,6 +4,7 @@
  * Editorial masthead
  */
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/i18n.php';
 ?>
 <header class="nav-header" id="nav-header" role="banner">
     <nav class="nav-container" aria-label="Primary Navigation">
@@ -13,18 +14,18 @@ require_once __DIR__ . '/../config/config.php';
         </a>
 
         <ul class="nav-links" role="list">
-            <li><a href="<?= BASE_PATH ?>/#work" class="nav-link">Work</a></li>
-            <li><a href="<?= BASE_PATH ?>/about" class="nav-link">About</a></li>
-            <li><a href="<?= BASE_PATH ?>/projects" class="nav-link">Projects</a></li>
-            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-link">IT Support</a></li>
-            <li><a href="<?= BASE_PATH ?>/#contact" class="nav-link">Contact</a></li>
+            <li><a href="<?= BASE_PATH ?>/#work" class="nav-link"><?= htmlspecialchars(t('nav_work')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/about" class="nav-link"><?= htmlspecialchars(t('nav_about')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/projects" class="nav-link"><?= htmlspecialchars(t('nav_projects')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-link"><?= htmlspecialchars(t('nav_it_support')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/#contact" class="nav-link"><?= htmlspecialchars(t('nav_contact')) ?></a></li>
             <li>
                 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light mode">
                     <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                     <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
                 </button>
             </li>
-            <li><a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="nav-cv">CV</a></li>
+            <li><a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="nav-cv"><?= htmlspecialchars(t('nav_cv')) ?></a></li>
         </ul>
 
         <div class="nav-mobile-controls">
@@ -42,12 +43,12 @@ require_once __DIR__ . '/../config/config.php';
 
     <div class="nav-mobile" id="mobile-menu" aria-hidden="true" role="navigation" aria-label="Mobile Navigation">
         <ul class="nav-mobile__links" role="list">
-            <li><a href="<?= BASE_PATH ?>/#work" class="nav-mobile__link" tabindex="-1">Work</a></li>
-            <li><a href="<?= BASE_PATH ?>/about" class="nav-mobile__link" tabindex="-1">About</a></li>
-            <li><a href="<?= BASE_PATH ?>/projects" class="nav-mobile__link" tabindex="-1">Projects</a></li>
-            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-mobile__link" tabindex="-1">IT Support</a></li>
-            <li><a href="<?= BASE_PATH ?>/#contact" class="nav-mobile__link" tabindex="-1">Contact</a></li>
-            <li><a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="nav-mobile__link" tabindex="-1">CV</a></li>
+            <li><a href="<?= BASE_PATH ?>/#work" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_work')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/about" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_about')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/projects" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_projects')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_it_support')) ?></a></li>
+            <li><a href="<?= BASE_PATH ?>/#contact" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_contact')) ?></a></li>
+            <li><a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="nav-mobile__link" tabindex="-1"><?= htmlspecialchars(t('nav_cv')) ?></a></li>
         </ul>
     </div>
 </header>

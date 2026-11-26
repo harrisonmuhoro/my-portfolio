@@ -317,6 +317,7 @@ window.ITS_I18N = <?= json_encode([
     'err_method'      => t('err_method'),
     'err_location'    => t('err_location'),
     'err_description' => t('err_description'),
+    'err_date'        => t('err_date'),
     'err_generic'     => t('err_generic'),
     'err_server'      => t('err_server'),
     'f_submit'        => t('f_submit'),
