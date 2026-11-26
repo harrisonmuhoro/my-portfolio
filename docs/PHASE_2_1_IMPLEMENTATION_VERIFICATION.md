@@ -22,7 +22,7 @@
 
 **LinkedIn URL — final canonical value:** `https://www.linkedin.com/in/harrison-muhoro/`. This owner-confirmed URL supersedes both the original `linkedin.com/in/zion-harrison` and the intermediate slugged variant `…/in/harrison-muhoro-6476b33a8/` (which appeared transiently during implementation and in the owner-supplied screenshot). All links resolve through `SOCIAL_LINKS['linkedin']` — single source, no hardcoded duplicates. Tests assert the exact URL (sameAs membership, every rendered `href`, contact-page anchor) and reject both superseded variants on all public pages.
 
-**Mail recipient precedence (corrected):** `MAIL_TO` = `MAIL_TO` env → `CONTACT_EMAIL` env → `zionmuhoro@gmail.com` (approved default). Previously `config.php` ignored the `MAIL_TO` env var and `config.example.php`/`config.local.php` ignored the `CONTACT_EMAIL` fallback — runtime behavior now matches documentation in all three files. `MAIL_FROM` and Resend settings unchanged.
+**Mail recipient precedence (corrected):** `MAIL_TO` = `MAIL_TO` env → `CONTACT_EMAIL` env → `zionmuhoro@gmail.com` (approved default). Previously `config.php` ignored the `MAIL_TO` env var and `config.example.php` ignored the `CONTACT_EMAIL` fallback — runtime behavior now matches documentation. `config/config.local.php` is a **local-only, gitignored** WAMP override (it exists on the dev machine, not in the repository — a 404 when fetched from GitHub is expected); its `MAIL_TO` line was updated locally to the same getenv chain so env precedence also works in local development. `MAIL_FROM` and Resend settings unchanged.
 
 ### GitHub profile README (`harrisonmuhoro/harrisonmuhoro`)
 
