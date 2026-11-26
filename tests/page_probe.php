@@ -38,6 +38,7 @@ $_SERVER['REMOTE_ADDR']     = $spec['ip'] ?? '203.0.113.10';
 $_SERVER['HTTP_HOST']       = $spec['host'] ?? 'www.harrisonmuhoro.me';
 $_SERVER['REQUEST_URI']     = $spec['uri'] ?? '/';
 $_SERVER['SERVER_NAME']     = $_SERVER['HTTP_HOST'];
+$_SERVER['HTTPS']           = !empty($spec['https']) ? 'on' : 'off';
 $_GET  = $spec['get'] ?? [];
 // Real requests populate $_GET from the URI query string — mirror that so
 // router mode behaves like Apache/PHP-FPM rather than a synthetic GET.

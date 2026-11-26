@@ -894,79 +894,109 @@ foreach ($seoHtml as $h) {
 }
 ok($badJson === 0, 'all JSON-LD blocks are valid JSON');
 
-// Sitemap: parse with DOMDocument — well-formedness, namespaces, exact
-// scheme/host per URL, required+strict lastmod, uniqueness, image assets.
-$sitemap = page_probe(['page' => 'sitemap.xml.php', 'uri' => '/sitemap.xml', 'host' => 'www.harrisonmuhoro.me']);
-libxml_use_internal_errors(true);
-$sitemapDom = new DOMDocument();
-$sitemapParsed = $sitemapDom->loadXML($sitemap);
-libxml_clear_errors();
-ok($sitemapParsed === true, 'sitemap is well-formed XML (DOMDocument)');
-$sitemapEntries = [];
-$sitemapImgs    = [];
-$sitemapNsOk    = false;
-if ($sitemapParsed) {
-    $root = $sitemapDom->documentElement;
-    $sitemapNsOk = $root !== null
-        && $root->localName === 'urlset'
-        && $root->namespaceURI === 'http://www.sitemaps.org/schemas/sitemap/0.9'
-        && $root->lookupNamespaceURI('image') === 'http://www.google.com/schemas/sitemap-image/1.1';
-    $xp = new DOMXPath($sitemapDom);
-    $xp->registerNamespace('sm', 'http://www.sitemaps.org/schemas/sitemap/0.9');
-    $xp->registerNamespace('image', 'http://www.google.com/schemas/sitemap-image/1.1');
-    foreach ($xp->query('//sm:url') ?: [] as $urlNode) {
-        $loc = $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'loc')->item(0);
-        $mod = $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'lastmod')->item(0);
-        if ($loc) {
-            $sitemapEntries[] = [
-                'loc'      => $loc->textContent,
-                'lastmod'  => $mod ? trim($mod->textContent) : null,
-                'locCount' => $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'loc')->length,
-                'modCount' => $mod ? $urlNode->getElementsByTagNameNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'lastmod')->length : 0,
-            ];
+// ── Sitemap validator ──────────────────────────────────────
+// Returns ['ok' => bool, 'errors' => [...], 'locs' => [...], 'images' => [...]].
+// Every <url> node must contain exactly one <loc> and one <lastmod> —
+// nodes missing either are errors, never silently skipped.
+function seo_validate_sitemap(string $xml): array {
+    $SM = 'http://www.sitemaps.org/schemas/sitemap/0.9';
+    $IM = 'http://www.google.com/schemas/sitemap-image/1.1';
+    $errors = [];
+    libxml_use_internal_errors(true);
+    $dom = new DOMDocument();
+    if (!$dom->loadXML($xml)) {
+        libxml_clear_errors();
+        return ['ok' => false, 'errors' => ['sitemap is not well-formed XML'], 'locs' => [], 'images' => []];
+    }
+    libxml_clear_errors();
+    $root = $dom->documentElement;
+    if (!$root || $root->localName !== 'urlset'
+        || $root->namespaceURI !== $SM
+        || $root->lookupNamespaceURI('image') !== $IM) {
+        $errors[] = 'root is not <urlset> with sitemap + image namespaces declared';
+    }
+    $xp = new DOMXPath($dom);
+    $xp->registerNamespace('sm', $SM);
+    $xp->registerNamespace('image', $IM);
+    $locs = [];
+    foreach ($xp->query('//sm:url') ?: [] as $i => $urlNode) {
+        $locsAll = $urlNode->getElementsByTagNameNS($SM, 'loc');
+        $modsAll = $urlNode->getElementsByTagNameNS($SM, 'lastmod');
+        if ($locsAll->length !== 1) {
+            $errors[] = "url[$i]: expected exactly 1 <loc>, found {$locsAll->length}";
+            continue;
         }
-        foreach ($xp->query('.//image:image/image:loc', $urlNode) ?: [] as $imgLoc) {
-            $sitemapImgs[] = $imgLoc->textContent;
+        if ($modsAll->length !== 1) {
+            $errors[] = "url[$i]: expected exactly 1 <lastmod>, found {$modsAll->length}";
+            continue;
+        }
+        $loc = $locsAll->item(0)->textContent;
+        $mod = trim($modsAll->item(0)->textContent);
+        $locs[] = $loc;
+        if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $mod, $dm)
+            || !checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])) {
+            $errors[] = "url[$i]: lastmod is not a valid YYYY-MM-DD date ('$mod')";
+        }
+        $parts = parse_url($loc);
+        if (!is_array($parts)
+            || ($parts['scheme'] ?? '') !== 'https'
+            || ($parts['host'] ?? '') !== 'www.harrisonmuhoro.me'
+            || empty($parts['path'])) {
+            $errors[] = "url[$i]: loc is not on the canonical origin ('$loc')";
         }
     }
+    if ($locs !== [] && count($locs) !== count(array_unique($locs))) {
+        $errors[] = 'duplicate <loc> URLs present';
+    }
+    if (!in_array('https://www.harrisonmuhoro.me/it-support?lang=en', $locs, true)
+        || !in_array('https://www.harrisonmuhoro.me/it-support?lang=sw', $locs, true)) {
+        $errors[] = 'missing one or both IT Support language URLs';
+    }
+    if (in_array('https://www.harrisonmuhoro.me/it-support', $locs, true)) {
+        $errors[] = 'bare /it-support entry present';
+    }
+    $images = [];
+    foreach ($xp->query('//image:image/image:loc') ?: [] as $imgLoc) {
+        $images[] = html_entity_decode($imgLoc->textContent);
+    }
+    if ($images === []) {
+        $errors[] = 'no <image:loc> entries found';
+    }
+    foreach ($images as $il) {
+        $p = parse_url($il, PHP_URL_PATH);
+        if ($p === null || !is_file(PROJECT_ROOT . $p)) {
+            $errors[] = "image file does not exist: $il";
+        }
+    }
+    return ['ok' => $errors === [], 'errors' => $errors, 'locs' => $locs, 'images' => $images];
 }
-ok($sitemapNsOk, 'sitemap root is <urlset> with sitemap + image namespaces declared');
-ok(count($sitemapEntries) > 0, 'sitemap parses to at least one <url> in the sitemap namespace');
-$locs = array_column($sitemapEntries, 'loc');
-ok(count($locs) === count(array_unique($locs)), 'sitemap contains no duplicate <loc> URLs');
-$urlsOk = $sitemapEntries !== [];
-foreach ($sitemapEntries as $e) {
-    // Exactly one loc and one lastmod per <url>.
-    if ($e['locCount'] !== 1 || $e['modCount'] !== 1) { $urlsOk = false; continue; }
-    // lastmod must be a real calendar date in YYYY-MM-DD.
-    if ($e['lastmod'] === null
-        || !preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $e['lastmod'], $dm)
-        || !checkdate((int) $dm[2], (int) $dm[3], (int) $dm[1])) { $urlsOk = false; continue; }
-    // URL must parse cleanly with the exact canonical scheme + host.
-    $parts = parse_url($e['loc']);
-    if (!is_array($parts)
-        || ($parts['scheme'] ?? '') !== 'https'
-        || ($parts['host'] ?? '') !== 'www.harrisonmuhoro.me'
-        || empty($parts['path'])) { $urlsOk = false; }
-}
-ok($urlsOk, 'every sitemap <url> has one loc + valid lastmod date and exact https://www.harrisonmuhoro.me origin');
-ok(in_array('https://www.harrisonmuhoro.me/it-support?lang=en', $locs, true)
-    && in_array('https://www.harrisonmuhoro.me/it-support?lang=sw', $locs, true),
+
+// Sitemap: real output must pass every structural check.
+$sitemap = page_probe(['page' => 'sitemap.xml.php', 'uri' => '/sitemap.xml', 'host' => 'www.harrisonmuhoro.me']);
+$sv = seo_validate_sitemap($sitemap);
+ok($sv['ok'], 'sitemap passes full structural validation'
+    . ($sv['ok'] ? '' : ' — ' . implode('; ', array_slice($sv['errors'], 0, 3))));
+ok(in_array('https://www.harrisonmuhoro.me/it-support?lang=en', $sv['locs'], true)
+    && in_array('https://www.harrisonmuhoro.me/it-support?lang=sw', $sv['locs'], true),
     'sitemap lists both IT Support language URLs');
-ok(!in_array('https://www.harrisonmuhoro.me/it-support', $locs, true),
-    'sitemap has no bare /it-support entry');
-$imgOk = $sitemapImgs !== [];
-foreach ($sitemapImgs as $loc) {
-    $path = parse_url(html_entity_decode($loc), PHP_URL_PATH);
-    if ($path === null || !is_file(PROJECT_ROOT . $path)) { $imgOk = false; }
-}
-ok($imgOk, 'every sitemap <image:loc> maps to an existing file (' . count($sitemapImgs) . ' images)');
+ok(count($sv['images']) > 0, 'sitemap contains image entries (' . count($sv['images']) . ' images)');
+
+// Regression: a <url> node with no <loc> must be rejected, not skipped.
+$badSitemap = '<?xml version="1.0" encoding="UTF-8"?>'
+    . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+    . ' xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'
+    . '<url><lastmod>2026-01-01</lastmod></url>'
+    . '<url><loc>https://www.harrisonmuhoro.me/</loc><lastmod>2026-01-01</lastmod></url>'
+    . '</urlset>';
+$svBad = seo_validate_sitemap($badSitemap);
+ok(!$svBad['ok'] && (bool) preg_grep('/expected exactly 1 <loc>, found 0/', $svBad['errors']),
+    'sitemap validator rejects a <url> node missing <loc>');
 
 // ── Sessions: lazy start — public routes must not open a PHP session ──
 echo "== sessions ==\n";
 
-$routerProbe = function (string $uri): string {
-    return page_probe(['router' => true, 'uri' => $uri, 'host' => 'www.harrisonmuhoro.me']);
+$routerProbe = function (string $uri, bool $https = false): string {
+    return page_probe(['router' => true, 'uri' => $uri, 'host' => 'www.harrisonmuhoro.me', 'https' => $https]);
 };
 $sessionState = function (string $html): ?int {
     return preg_match('/<!--probe:session_status=(\d+)/', $html, $m) ? (int) $m[1] : null;
@@ -979,23 +1009,28 @@ foreach (['/contact', '/it-support'] as $u) {
     ok($sessionState($routerProbe($u)) === PHP_SESSION_ACTIVE,
         "session started for stateful route $u");
 }
-// Session cookie attributes on a stateful route: host-only (no domain),
-// HttpOnly, SameSite=Lax, path=/, browser-session lifetime. 'secure' is
-// asserted as a boolean — true only when the request is HTTPS.
+// Session cookie attributes on a stateful route under BOTH schemes:
+// host-only (no domain), HttpOnly, SameSite=Lax, path=/, session-lifetime;
+// 'secure' must be true on HTTPS and false on plain-HTTP development.
 $cookieParams = function (string $html): ?array {
     return preg_match('/<!--probe:session_status=\d+;cookie=(.*?)-->/', $html, $m)
         ? (json_decode(html_entity_decode($m[1], ENT_QUOTES), true) ?: null) : null;
 };
-foreach (['/contact', '/it-support'] as $u) {
-    $cp = $cookieParams($routerProbe($u));
-    ok(is_array($cp)
+$cookieAttrsOk = function (?array $cp): bool {
+    return is_array($cp)
         && ($cp['httponly'] ?? null) === true
         && strtolower((string) ($cp['samesite'] ?? '')) === 'lax'
         && ($cp['domain'] ?? 'x') === ''
         && ($cp['path'] ?? '') === '/'
-        && (int) ($cp['lifetime'] ?? -1) === 0
-        && array_key_exists('secure', $cp),
-        "session cookie on $u is host-only, HttpOnly, SameSite=Lax, path=/, session-lifetime");
+        && (int) ($cp['lifetime'] ?? -1) === 0;
+};
+foreach (['/contact', '/it-support'] as $u) {
+    $cpHttps = $cookieParams($routerProbe($u, true));
+    $cpHttp  = $cookieParams($routerProbe($u, false));
+    ok($cookieAttrsOk($cpHttps) && ($cpHttps['secure'] ?? null) === true,
+        "HTTPS session cookie on $u is secure, host-only, HttpOnly, SameSite=Lax");
+    ok($cookieAttrsOk($cpHttp) && ($cpHttp['secure'] ?? null) === false,
+        "HTTP session cookie on $u omits Secure (development), host-only, HttpOnly, SameSite=Lax");
 }
 // Language persistence still works end-to-end through the router:
 // ?lang=sw renders Kiswahili even though the session starts fresh.
