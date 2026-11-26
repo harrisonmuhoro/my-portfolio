@@ -37,7 +37,7 @@
 - "2 years of practical experience" — scoped specifically to networking/IT support
 - Featured projects: Afya HMS, Taara HMS, InduTrack KE, Scott Pigs Farm, TuaVois (+ Vuka, Loan Mgmt, Portfolio listed)
 - Stack badges: PHP, Laravel, Node.js, React, TypeScript, JS, HTML5, CSS3, Tailwind, MySQL, PostgreSQL, Redis, Docker
-- Links: Portfolio `harrisonmuhoro.me` ✅, GitHub ✅, Email `zionh191@gmail.com` ✅ — **no LinkedIn link in README at audit time**
+- Links: Portfolio `harrisonmuhoro.me` ✅, GitHub ✅, Email `zionmuhoro@gmail.com` ✅ — **no LinkedIn link in README at audit time**
 - Profile README repo metadata empty (no description/topics/website)
 
 **LinkedIn** — *per owner screenshot, 26 November 2026* **[CORRECTED]**:
@@ -58,7 +58,7 @@
 | Portfolio link | canonical domain | `harrisonmuhoro.me` ✅ | — (not in screenshot) | ✅ |
 | GitHub link | `sameAs` + footer | n/a | — (not in screenshot) | ✅ |
 | LinkedIn link | `sameAs` + footer (**old `zion-harrison` URL at audit time**) | absent from README at audit time | self | ⚠️ **old URL published on website — corrected in Phase 2.1 implementation** |
-| Email | `zionh191@gmail.com` | same ✅ | — (not in screenshot) | ✅ |
+| Email | `zionmuhoro@gmail.com` | same ✅ | — (not in screenshot) | ✅ |
 | Experience claim | "2 years" badge/hero | "2 years" networking/IT support | — (not in screenshot) | ✅ **[CORRECTED]** owner confirms: two years of *combined* practical experience across software development and IT Support & Networking — not per-area |
 | Certifications | 2× freeCodeCamp + AZ-900 in-progress | AZ-900 noted as in-progress in later README revision | — (not in screenshot) | ⚠️ unverified externally; **AZ-900 confirmed still "In progress" by owner** |
 | Projects | Afya HMS, Taara, InduTrack KE, etc. | Same named projects featured | — (not in screenshot) | ✅ consistent |

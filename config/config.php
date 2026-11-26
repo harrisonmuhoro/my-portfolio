@@ -75,7 +75,7 @@ define('SECONDARY_TITLE',  'Full-Stack Development · IT Support & Networking ·
 define('LOCATION',         'Nyeri, Kenya');
 
 // ─── CONTACT ──────────────────────────────────────────────────────────────────
-define('EMAIL_ADDRESS',    getenv('CONTACT_EMAIL')   ?: 'zionh191@gmail.com');
+define('EMAIL_ADDRESS',    getenv('CONTACT_EMAIL')   ?: 'zionmuhoro@gmail.com');
 define('PHONE_PRIMARY',    '+254 726 300 091');
 define('PHONE_SECONDARY',  '+254 105 628 524');
 define('WHATSAPP_NUMBER',  '254726300091');
@@ -112,7 +112,7 @@ define('DB_CHARSET', 'utf8mb4');
 if (!defined('RESEND_API_KEY')) define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
 if (!defined('RESEND_API_URL')) define('RESEND_API_URL', getenv('RESEND_API_URL') ?: 'https://api.resend.com/emails');
 if (!defined('MAIL_FROM'))      define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
-if (!defined('MAIL_TO'))        define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionh191@gmail.com');
+if (!defined('MAIL_TO'))        define('MAIL_TO',        getenv('CONTACT_EMAIL')  ?: 'zionmuhoro@gmail.com');
 
 // ─── SEO ──────────────────────────────────────────────────────────────────────
 define('SEO_KEYWORDS',   'Web Developer Kenya, PHP Developer Kenya, Full-Stack Developer Kenya, Website Developer Nyeri, Business System Developer Kenya, Harrison Muhoro, Software Developer Kenya, Technology Consultant Kenya, IT Consultant Nyeri');
