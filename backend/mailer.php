@@ -28,6 +28,13 @@ function portfolio_send_mail(string $subject, string $body, string $reply_to_ema
         return resend_send($subject, $body, $reply_to_email, $reply_to_name);
     }
 
+    // Surface missing provider config in the logs once per request instead
+    // of silently degrading to mail() — production should always have a key.
+    static $warned = false;
+    if (!$warned) {
+        error_log('[Mailer] RESEND_API_KEY is not configured — using mail() fallback');
+        $warned = true;
+    }
     return mail_fallback($subject, $body, $reply_to_email, $reply_to_name);
 }
 

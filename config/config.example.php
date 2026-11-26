@@ -64,6 +64,22 @@ define('OG_IMAGE', SITE_URL . '/assets/images/og-image.webp');
 define('OG_TYPE', 'website');
 define('TWITTER_CARD', 'summary_large_image');
 
+// ─── MAILER (Resend) ────────────────────────────────────────
+// Set these as environment variables or in config.local.php (gitignored).
+// MAIL_FROM must be on a domain verified in the Resend account.
+define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
+define('RESEND_API_URL', getenv('RESEND_API_URL') ?: 'https://api.resend.com/emails');
+define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
+define('MAIL_TO',        getenv('MAIL_TO')        ?: 'zionh191@gmail.com');
+
+// ─── RATE LIMITER ───────────────────────────────────────────
+// RATE_LIMIT_DIR:      persistent dir for limiter state (default:
+//                      storage/rate_limits, then system temp).
+// RATE_LIMIT_FAIL_MODE: 'open' (default) allows requests when storage
+//                      fails; 'closed' denies them with HTTP 429.
+define('RATE_LIMIT_DIR',       getenv('RATE_LIMIT_DIR') ?: '');
+define('RATE_LIMIT_FAIL_MODE', getenv('RATE_LIMIT_FAIL_MODE') ?: 'open');
+
 // ─── SECURITY ─────────────────────────────────────────────
 define('CSRF_TOKEN_NAME', 'csrf_token');
 define('FORM_RATE_LIMIT', 3);        // Max submissions per hour

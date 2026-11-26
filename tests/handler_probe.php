@@ -4,7 +4,8 @@
  * backend/it_support_handler.php without a web server.
  *
  * Usage:  php tests/handler_probe.php <spec.json>
- * Spec:   {"post": {...}, "session": {...}, "env": {...}, "ip": "..."}
+ * Spec:   {"post": {...}, "session": {...}, "env": {...}, "ip": "...",
+ *          "handler": "it_support_handler.php", "method": "POST"}
  *
  * Output: the handler's JSON response followed by a line
  *         "__HTTP__:<code>" appended by a shutdown function.
@@ -29,10 +30,13 @@ foreach (($spec['env'] ?? []) as $k => $v) {
     putenv($k . '=' . $v);
 }
 
-$_SERVER['REQUEST_METHOD'] = 'POST';
+// Handler name is restricted to a basename inside backend/ — no traversal.
+$handler = basename($spec['handler'] ?? 'it_support_handler.php');
+
+$_SERVER['REQUEST_METHOD'] = strtoupper($spec['method'] ?? 'POST');
 $_SERVER['REMOTE_ADDR']     = $spec['ip'] ?? '203.0.113.10';
 $_SERVER['HTTP_HOST']       = 'localhost';
-$_SERVER['REQUEST_URI']     = '/backend/it_support_handler.php';
+$_SERVER['REQUEST_URI']     = '/backend/' . $handler;
 $_SERVER['SERVER_NAME']     = 'localhost';
 $_POST  = $spec['post']    ?? [];
 $_GET   = $spec['get']     ?? [];
@@ -48,4 +52,4 @@ register_shutdown_function(function () {
     echo "\n__HTTP__:" . http_response_code();
 });
 
-require PROJECT_ROOT . '/backend/it_support_handler.php';
+require PROJECT_ROOT . '/backend/' . $handler;

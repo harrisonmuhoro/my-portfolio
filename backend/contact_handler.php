@@ -138,5 +138,5 @@ if ($sent) {
 
     json_response(true, 'Message sent successfully! I will get back to you within 24 hours.');
 } else {
-    json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 200);
+    json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 503);
 }

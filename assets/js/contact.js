@@ -98,8 +98,11 @@
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         })
         .then(function (res) {
-            if (!res.ok) throw new Error('Server error: ' + res.status);
-            return res.json();
+            // Parse the JSON body regardless of status — the API returns
+            // structured errors (422/429/503) the user should see.
+            return res.json().catch(function () {
+                throw new Error('Server error. Please try again.');
+            });
         })
         .then(function (json) {
             if (json.success) {

@@ -177,5 +177,5 @@ if ($sent) {
 
     json_response(true, t('f_success', $request_lang));
 } else {
-    json_response(false, t('err_server', $request_lang), 200);
+    json_response(false, t('err_server', $request_lang), 503);
 }

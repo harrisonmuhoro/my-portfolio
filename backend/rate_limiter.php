@@ -7,8 +7,14 @@
  * caller identity (IP + form bucket), so clearing cookies or opening a new
  * browser session does not reset the limit.
  *
- * DEPLOYMENT ASSUMPTIONS & FAILURE POLICY
- * ---------------------------------------
+ * STORAGE & FAILURE POLICY
+ * ------------------------
+ * - State lives in RATE_LIMIT_DIR when configured, otherwise
+ *   PROJECT_ROOT/storage/rate_limits (persistent app storage — survives
+ *   temp-dir cleanup on PaaS hosts), falling back to the system temp dir.
+ *   Point RATE_LIMIT_DIR at a mounted volume if the host filesystem is
+ *   ephemeral. Guard files (.htaccess / index.php) are written automatically
+ *   when storage sits inside the web root.
  * - Designed for a single application instance with a shared local
  *   filesystem (WAMP, typical shared hosting, single-container PaaS such as
  *   Wasmer Edge). If the app ever runs across multiple instances/containers
@@ -17,11 +23,12 @@
  * - Client identity uses REMOTE_ADDR only. X-Forwarded-For / Client-IP are
  *   deliberately ignored because they are client-spoofable unless a trusted
  *   proxy is configured (none is, today).
- * - Failure policy: FAIL OPEN. If the state directory cannot be created or
- *   a file cannot be locked, the request is allowed and the failure is
- *   logged. Rationale: a contact form should remain reachable during
- *   storage incidents; the CSRF token, honeypot and input validation still
- *   apply. Corrupted state files are treated as an expired window.
+ * - Failure policy is configurable via RATE_LIMIT_FAIL_MODE:
+ *     'open'   (default) — storage failures allow the request and are logged.
+ *     'closed' — storage failures deny the request (HTTP 429) and are logged.
+ *   Default is 'open' so a contact form stays reachable during storage
+ *   incidents; CSRF, honeypot and input validation still apply either way.
+ *   Corrupted state files are treated as an expired window.
  * - Retention: bucket files are deleted opportunistically (~2% of requests)
  *   once they are older than twice the rate-limit window.
  *
@@ -33,17 +40,73 @@ if (!defined('PROJECT_ROOT')) {
     exit('Forbidden');
 }
 
-/** Directory holding limiter state files (outside the web root). */
+/**
+ * Resolve a writable state directory, or '' when none is available.
+ *
+ * When RATE_LIMIT_DIR is explicitly configured it is authoritative — no
+ * silent fallback, so a misconfigured path surfaces via the fail policy
+ * instead of scattering state across locations. Otherwise prefer the
+ * persistent in-project storage dir, then the system temp dir.
+ */
 function rl_storage_dir(): string {
-    $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0700, true);
+    $candidates = [];
+    if (defined('RATE_LIMIT_DIR') && trim((string) RATE_LIMIT_DIR) !== '') {
+        $candidates[] = rtrim((string) RATE_LIMIT_DIR, '/\\');
+    } else {
+        $candidates[] = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'storage'
+                      . DIRECTORY_SEPARATOR . 'rate_limits';
+        $candidates[] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
     }
-    // If the directory exists but is not writable, surface it for logging.
-    if (is_dir($dir) && !is_writable($dir)) {
-        error_log('[RateLimiter] storage directory not writable: ' . $dir);
+
+    foreach ($candidates as $dir) {
+        if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+            error_log('[RateLimiter] cannot create storage directory: ' . $dir);
+            continue;
+        }
+        if (!is_writable($dir)) {
+            error_log('[RateLimiter] storage directory not writable: ' . $dir);
+            continue;
+        }
+        rl_guard_web_dir($dir);
+        return $dir;
     }
-    return $dir;
+
+    error_log('[RateLimiter] no writable storage directory available');
+    return '';
+}
+
+/** Drop Apache/PHP guard files when state lives inside the web root. */
+function rl_guard_web_dir(string $dir): void {
+    $root = str_replace(['\\', '//'], '/', PROJECT_ROOT);
+    $path = str_replace(['\\', '//'], '/', $dir);
+    if (!str_starts_with($path, $root)) {
+        return;
+    }
+    $htaccess = $dir . DIRECTORY_SEPARATOR . '.htaccess';
+    // Apache 2.4 syntax only — the legacy "Deny from all" line triggers a
+    // 500 on hosts without mod_access_compat.
+    $want = "Require all denied\n";
+    if (!is_file($htaccess) || trim((string) @file_get_contents($htaccess)) !== trim($want)) {
+        @file_put_contents($htaccess, $want);
+    }
+    $index = $dir . DIRECTORY_SEPARATOR . 'index.php';
+    if (!is_file($index)) {
+        @file_put_contents($index, "<?php http_response_code(403); exit;\n");
+    }
+}
+
+/**
+ * Apply the configured failure policy when storage is unusable.
+ * Returns 0 (allow) under 'open', or a retry-after under 'closed'.
+ */
+function rl_storage_failure(int $window): int {
+    $mode = defined('RATE_LIMIT_FAIL_MODE')
+        ? strtolower(trim((string) RATE_LIMIT_FAIL_MODE)) : 'open';
+    if ($mode === 'closed') {
+        error_log('[RateLimiter] fail-closed policy: denying request');
+        return max(1, $window);
+    }
+    return 0;
 }
 
 /** Remove state files older than $ttl seconds (opportunistic cleanup). */
@@ -64,19 +127,24 @@ function rl_cleanup(string $dir, int $ttl): void {
  * @return int   0 when allowed; otherwise seconds until the window resets
  */
 function rate_limit_hit(string $bucket, int $max, int $window): int {
-    $dir  = rl_storage_dir();
+    $dir = rl_storage_dir();
+    if ($dir === '') {
+        return rl_storage_failure($window);
+    }
     $file = $dir . DIRECTORY_SEPARATOR . hash('sha256', $bucket) . '.json';
 
     $fp = @fopen($file, 'c+');
     if ($fp === false) {
-        // Storage unavailable — fail open but leave a trace.
+        // Storage unavailable — log, then apply the fail policy.
         error_log('[RateLimiter] cannot open state file: ' . $file);
-        return 0;
+        return rl_storage_failure($window);
     }
 
     if (!flock($fp, LOCK_EX)) {
+        // Consistent with the fopen failure path: log, then fail policy.
+        error_log('[RateLimiter] failed to lock state file: ' . $file);
         fclose($fp);
-        return 0;
+        return rl_storage_failure($window);
     }
 
     $raw  = stream_get_contents($fp);

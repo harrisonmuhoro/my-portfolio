@@ -77,6 +77,12 @@ ok(rate_limit_hit($bucket2, 1, 1) > 0, 'limit enforced within window');
 sleep(2);
 ok(rate_limit_hit($bucket2, 1, 1) === 0, 'counter resets after window expires');
 
+$rlDir = rl_storage_dir();
+ok($rlDir !== '' && str_contains(str_replace('\\', '/', $rlDir), '/storage/'),
+    'rate-limit storage resolves to persistent project storage dir');
+ok(is_file($rlDir . DIRECTORY_SEPARATOR . '.htaccess'),
+    'web guard .htaccess written for in-root storage dir');
+
 // ── mailer helpers ──────────────────────────────────────────
 echo "== mailer ==\n";
 
@@ -86,6 +92,33 @@ ok(mail_addr('', 'a@b.com') === '<a@b.com>', 'mail_addr handles empty name');
 
 // ── handler integration probes ──────────────────────────────
 echo "== handler probes ==\n";
+
+/**
+ * Stop the stub server and remove its log file.
+ * proc_terminate() is unreliable for `php -S` on Windows, so verify the
+ * process actually exited and fall back to taskkill there.
+ */
+function stop_stub($server, string $nullFile): void {
+    if (is_resource($server)) {
+        $pid = null;
+        $st  = proc_get_status($server);
+        if (is_array($st) && isset($st['pid'])) { $pid = (int) $st['pid']; }
+        if (PHP_OS_FAMILY === 'Windows') {
+            // proc_open wraps commands in cmd.exe on Windows. proc_terminate
+            // kills only that wrapper and orphans the php -S child BEFORE a
+            // tree-kill can see it — so on Windows go straight to taskkill /T.
+            if ($pid) {
+                pclose(popen('taskkill /PID ' . $pid . ' /F /T >NUL 2>&1', 'r'));
+            }
+            usleep(200000);
+        } else {
+            proc_terminate($server);
+            usleep(200000);
+        }
+        @proc_close($server);
+    }
+    @unlink($nullFile);
+}
 
 /**
  * Run one simulated POST through the real handler in a subprocess.
@@ -117,11 +150,12 @@ $basePost = [
 ];
 $csrfSession = ['csrf_token' => 'test-token-123'];
 
-// Unused TEST-NET-3 range; each probe gets a distinct IP so rate-limit
-// state never leaks between tests or between runs.
+// TEST-NET-2 range. The third octet is randomised per run so rate-limit
+// buckets from previous runs (1h retention) can never collide with this
+// run's probes; each probe still gets a distinct IP within the run.
 $nextIp = function () {
     static $n = 0;
-    return '198.51.100.' . (++$n);
+    return '198.51.' . random_int(1, 250) . '.' . (++$n);
 };
 
 $mkSpec = function (array $post, array $session = [], array $env = []) use ($basePost, $csrfSession, $nextIp) {
@@ -178,14 +212,37 @@ ok(($r['json']['success'] ?? true) === false && str_contains($r['json']['message
 // ── Mail provider paths (stubbed — no real email) ───────────
 echo "== mail provider ==\n";
 
-$stubPort = 18231;
+// Allocate a free port dynamically — never a hardcoded one.
+$tmpSock = stream_socket_server('tcp://127.0.0.1:0', $errno, $errstr);
+if ($tmpSock === false) {
+    echo "FAIL cannot allocate a local port: $errstr\n";
+    exit(1);
+}
+$stubPort = (int) substr(strrchr(stream_socket_get_name($tmpSock, false), ':'), 1);
+fclose($tmpSock);
+
 $nullFile = tempnam(sys_get_temp_dir(), 'stub_null_');
 $server = proc_open(
     'php -S 127.0.0.1:' . $stubPort . ' ' . escapeshellarg(PROJECT_ROOT . '/tests/resend_stub.php'),
     [0 => ['pipe', 'r'], 1 => ['file', $nullFile, 'a'], 2 => ['file', $nullFile, 'a']],
     $pipes
 );
-usleep(500000); // let the stub boot
+
+// Poll the stub until it actually answers (bounded at ~5s) — no fixed sleep.
+$stubReady = false;
+for ($i = 0; $i < 50 && !$stubReady; $i++) {
+    $stubReady = @file_get_contents('http://127.0.0.1:' . $stubPort . '/emails') !== false;
+    if (!$stubReady) { usleep(100000); }
+}
+if (!$stubReady) {
+    stop_stub($server, $nullFile);
+    echo "FAIL Resend stub did not become ready on 127.0.0.1:$stubPort\n";
+    exit(1);
+}
+// Guarantee cleanup even if the script exits early.
+register_shutdown_function(function () use ($server, $nullFile) {
+    stop_stub($server, $nullFile);
+});
 
 $providerEnv = [
     'RESEND_API_KEY' => 'test-key',
@@ -196,11 +253,72 @@ $providerEnv = [
 $r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv));
 ok(($r['json']['success'] ?? false) === true, 'provider 200 → success:true');
 
-// Failure path: unreachable endpoint → generic user-facing error
+// Failure path: unreachable endpoint → generic user-facing error + 503
 $r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $deadMailEnv));
-ok(($r['json']['success'] ?? true) === false, 'provider unreachable → success:false (generic error)');
+ok(($r['json']['success'] ?? true) === false && $r['http'] === 503, 'provider unreachable → success:false + HTTP 503');
 
-// ── Rate limit enforcement through the handler ──────────────
+// ── Contact handler probes ──────────────────────────────────
+echo "== contact handler probes ==\n";
+
+$contactPost = [
+    'name'         => 'Test User',
+    'email'        => 'test@example.com',
+    'phone'        => '+254726300091',
+    'project_type' => 'website',
+    'subject'      => 'Test enquiry subject',
+    'message'      => 'This is a valid message for the contact form handler tests.',
+];
+$mkContact = function (array $post, array $session = [], array $env = [], string $method = 'POST') use ($contactPost, $csrfSession, $nextIp) {
+    return [
+        'handler' => 'contact_handler.php',
+        'method'  => $method,
+        'post'    => array_merge($contactPost, $post),
+        'session' => array_merge($csrfSession, $session),
+        'ip'      => $nextIp(),
+        'env'     => $env,
+    ];
+};
+
+// Non-POST rejected
+$r = probe($mkContact([], [], [], 'GET'));
+ok($r['http'] === 405 && ($r['json']['success'] ?? true) === false, 'contact GET → 405 Method Not Allowed');
+
+// CSRF rejection
+$r = probe($mkContact(['csrf_token' => 'bad-token']));
+ok($r['http'] === 403 && ($r['json']['success'] ?? true) === false, 'contact invalid CSRF → 403');
+
+// Honeypot silently succeeds
+$r = probe($mkContact(['csrf_token' => 'test-token-123', 'website' => 'http://spam.example']));
+ok(($r['json']['success'] ?? false) === true, 'contact honeypot silently succeeds');
+
+// Required-field validation
+$r = probe($mkContact(['csrf_token' => 'test-token-123', 'email' => 'not-an-email', 'project_type' => 'hacked', 'subject' => 'x', 'message' => 'short'], [], $deadMailEnv));
+ok(($r['json']['success'] ?? true) === false && $r['http'] === 422, 'contact invalid fields rejected with 422');
+
+// Valid submission reaches provider — success path
+$r = probe($mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv));
+ok(($r['json']['success'] ?? false) === true && $r['http'] === 200, 'contact valid submission + provider 200 → success');
+
+// Provider failure → 503
+$r = probe($mkContact(['csrf_token' => 'test-token-123'], [], $deadMailEnv));
+ok(($r['json']['success'] ?? true) === false && $r['http'] === 503, 'contact provider failure → success:false + 503');
+
+// Contact rate limit: FORM_RATE_LIMIT submissions then 429
+$contactRlIp = $nextIp();
+$codes = [];
+for ($i = 0; $i < FORM_RATE_LIMIT + 1; $i++) {
+    $r = probe([
+        'handler' => 'contact_handler.php',
+        'post'    => array_merge($contactPost, ['csrf_token' => 'test-token-123']),
+        'session' => $csrfSession,
+        'ip'      => $contactRlIp,
+        'env'     => $providerEnv,
+    ]);
+    $codes[] = $r['http'];
+}
+ok(in_array(429, $codes, true) && end($codes) === 429, 'contact rate limit → 429 after ' . FORM_RATE_LIMIT . ' (got: ' . implode(',', $codes) . ')');
+
+// ── Rate limit enforcement through the IT support handler ───
 echo "== handler rate limit ==\n";
 
 $rlIp = $nextIp(); // fresh IP per run — never reuse a saturated bucket
@@ -217,8 +335,32 @@ for ($i = 0; $i < FORM_RATE_LIMIT + 1; $i++) {
 ok(in_array(429, $codes, true), 'rate limit returns 429 after ' . FORM_RATE_LIMIT . ' submissions (got: ' . implode(',', $codes) . ')');
 ok(end($codes) === 429, 'the (limit+1)th request is the blocked one');
 
-if (is_resource($server)) { proc_terminate($server); }
-@unlink($nullFile);
+// ── Rate limiter failure policy ──────────────────────────────
+echo "== rate limiter failure policy ==\n";
+
+// Point RATE_LIMIT_DIR at an existing FILE so no storage candidate works.
+$badDirFile = (string) tempnam(sys_get_temp_dir(), 'rl_bad_');
+$deadEnv = [
+    'RESEND_API_KEY' => 'test-key',
+    'RESEND_API_URL' => 'http://127.0.0.1:1/emails',
+];
+
+$r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'RATE_LIMIT_DIR'       => $badDirFile,
+    'RATE_LIMIT_FAIL_MODE' => 'closed',
+]));
+ok($r['http'] === 429, 'fail-closed policy denies request when storage unusable');
+
+$r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'RATE_LIMIT_DIR'       => $badDirFile,
+    'RATE_LIMIT_FAIL_MODE' => 'open',
+]));
+ok($r['http'] === 503, 'fail-open policy (default) still allows request when storage unusable');
+
+@unlink($badDirFile);
+
+// Explicit cleanup before exit (shutdown function is the backup).
+stop_stub($server, $nullFile);
 
 echo "\n$passed passed, $failed failed\n";
 exit($failed > 0 ? 1 : 0);
