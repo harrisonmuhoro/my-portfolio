@@ -22,6 +22,12 @@ define('PROJECT_ROOT', dirname(__DIR__));
 // Use the system temp directory consistently for the suite and probe workers.
 ini_set('session.save_path', sys_get_temp_dir());
 
+// The suite's unit tests exercise development-mode fallbacks. On CI there is
+// no config.local.php and CLI has no HTTP_HOST, so ENVIRONMENT would resolve
+// to 'production' (fail-closed rate limiter) and fail spuriously. Pin the
+// suite process to development; handler probes set their own APP_ENV per spec.
+putenv('APP_ENV=development');
+
 require_once PROJECT_ROOT . '/config/config.php';
 require_once PROJECT_ROOT . '/includes/i18n.php';
 require_once PROJECT_ROOT . '/backend/rate_limiter.php';
@@ -446,6 +452,71 @@ ok($r['http'] === 429, 'production storage resolving under DOCUMENT_ROOT is reje
 foreach (glob($inRootProdDirPath . DIRECTORY_SEPARATOR . 'rate_limits' . DIRECTORY_SEPARATOR . '*') ?: [] as $file) { @unlink($file); }
 @rmdir($inRootProdDirPath . DIRECTORY_SEPARATOR . 'rate_limits');
 @rmdir($inRootProdDirPath);
+
+// Public root cannot be established → fail closed even with a valid dir.
+$noRootDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_noroot_' . bin2hex(random_bytes(6));
+$noRootSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $noRootDir,
+]);
+$noRootSpec['host'] = 'portfolio.example';
+// No document_root and no PUBLIC_ROOT → public root unresolvable.
+$r = probe($noRootSpec);
+ok($r['http'] === 429, 'production fails closed when public root cannot be established');
+
+// DOCUMENT_ROOT set but unresolvable → same fail-closed outcome.
+$badRootSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $noRootDir,
+]);
+$badRootSpec['host'] = 'portfolio.example';
+$badRootSpec['document_root'] = $noRootDir . '_does_not_exist';
+$r = probe($badRootSpec);
+ok($r['http'] === 429, 'production fails closed on unresolvable DOCUMENT_ROOT');
+
+// Positive case: real document root + storage outside it → allowed through.
+$pubRoot = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_webroot_' . bin2hex(random_bytes(6));
+$outsideDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_outside_' . bin2hex(random_bytes(6));
+mkdir($pubRoot);
+$okProdSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $outsideDir,
+]);
+$okProdSpec['host'] = 'portfolio.example';
+$okProdSpec['document_root'] = $pubRoot;
+$r = probe($okProdSpec);
+ok($r['http'] === 503, 'production accepts storage verified outside the public root');
+foreach ((array) glob($outsideDir . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($outsideDir);
+@rmdir($pubRoot);
+
+// PUBLIC_ROOT env override establishes the root when DOCUMENT_ROOT is absent.
+$pubOverride = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_pubovr_' . bin2hex(random_bytes(6));
+$outsideOvr = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_outovr_' . bin2hex(random_bytes(6));
+mkdir($pubOverride);
+$ovrSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'PUBLIC_ROOT' => $pubOverride,
+    'RATE_LIMIT_DIR' => $outsideOvr,
+]);
+$ovrSpec['host'] = 'portfolio.example';
+$r = probe($ovrSpec);
+ok($r['http'] === 503, 'PUBLIC_ROOT override verifies storage outside the public root');
+$insideOvr = $pubOverride . DIRECTORY_SEPARATOR . 'rl_inside';
+$inOvrSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'PUBLIC_ROOT' => $pubOverride,
+    'RATE_LIMIT_DIR' => $insideOvr,
+]);
+$inOvrSpec['host'] = 'portfolio.example';
+$r = probe($inOvrSpec);
+ok($r['http'] === 429, 'PUBLIC_ROOT override rejects storage inside the public root');
+foreach ((array) glob($outsideOvr . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($outsideOvr);
+foreach ((array) glob($insideOvr . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($insideOvr);
+@rmdir($pubOverride);
+@rmdir($noRootDir);
 
 $localFallback = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv);
 $r = probe($localFallback);

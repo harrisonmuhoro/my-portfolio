@@ -136,6 +136,11 @@ define('ALLOWED_FILE_TYPES', []);
 //                      to 'open'. Explicit values may override either default.
 if (!defined('RATE_LIMIT_DIR'))       define('RATE_LIMIT_DIR',       getenv('RATE_LIMIT_DIR') ?: '');
 if (!defined('RATE_LIMIT_FAIL_MODE')) define('RATE_LIMIT_FAIL_MODE', getenv('RATE_LIMIT_FAIL_MODE') ?: (ENVIRONMENT === 'production' ? 'closed' : 'open'));
+// PUBLIC_ROOT: optional explicit path to the served document root. Used by
+// the rate limiter to verify RATE_LIMIT_DIR sits outside the public tree.
+// When unset, DOCUMENT_ROOT is used; if neither resolves in production,
+// rate-limit storage validation fails closed.
+if (!defined('PUBLIC_ROOT'))          define('PUBLIC_ROOT',          getenv('PUBLIC_ROOT') ?: '');
 
 // ─── ERROR HANDLING ───────────────────────────────────────────────────────────
 if (DEBUG_MODE) {

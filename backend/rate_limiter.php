@@ -10,9 +10,12 @@
  * STORAGE & FAILURE POLICY
  * ------------------------
  * - Production requires RATE_LIMIT_DIR: an absolute, writable, persistent
- *   directory outside DOCUMENT_ROOT. Missing, relative, or in-root paths are
- *   treated as storage failures; production defaults to fail-closed. This
- *   cannot verify volume persistence, so hosting must provide that guarantee.
+ *   directory proven to be outside the public web root. The public root is
+ *   taken from PUBLIC_ROOT when configured, else DOCUMENT_ROOT; if neither
+ *   resolves to a real directory, storage validation fails closed. Missing,
+ *   relative, or in-root paths are treated as storage failures; production
+ *   defaults to fail-closed. This cannot verify volume persistence, so
+ *   hosting must provide that guarantee.
  * - Development may fall back to a sibling of DOCUMENT_ROOT, project storage,
  *   then system temp. In-project guards are defense-in-depth only.
  * - Designed for a single application instance with a shared local
@@ -68,6 +71,19 @@ function rl_storage_dir(): string {
         $candidates[] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
     }
 
+    $publicRoot = null;
+    if ($production) {
+        // The public root must be established reliably BEFORE trusting any
+        // storage path — otherwise an in-root directory could pass unnoticed
+        // on hosts where DOCUMENT_ROOT is missing or wrong.
+        $publicRoot = rl_public_root();
+        if ($publicRoot === null) {
+            error_log('[RateLimiter] production public web root cannot be established '
+                . '(set PUBLIC_ROOT or a valid DOCUMENT_ROOT)');
+            return '';
+        }
+    }
+
     foreach ($candidates as $dir) {
         if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
             error_log('[RateLimiter] cannot create storage directory: ' . $dir);
@@ -79,9 +95,8 @@ function rl_storage_dir(): string {
         }
         if ($production) {
             $resolvedDir = realpath($dir);
-            $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath((string) $_SERVER['DOCUMENT_ROOT']) : false;
-            if ($resolvedDir === false || ($docRoot !== false && rl_path_is_within($resolvedDir, $docRoot))) {
-                error_log('[RateLimiter] production RATE_LIMIT_DIR must resolve outside DOCUMENT_ROOT');
+            if ($resolvedDir === false || rl_path_is_within($resolvedDir, $publicRoot)) {
+                error_log('[RateLimiter] production RATE_LIMIT_DIR must resolve outside the public web root');
                 return '';
             }
         }
@@ -91,6 +106,26 @@ function rl_storage_dir(): string {
 
     error_log('[RateLimiter] no writable storage directory available');
     return '';
+}
+
+/**
+ * Resolve the verified public web root for production storage checks.
+ * PUBLIC_ROOT (explicit deployment config) wins; DOCUMENT_ROOT is the
+ * fallback. Returns the canonical real path, or null when neither yields
+ * an existing directory — callers must then fail closed.
+ */
+function rl_public_root() {
+    $configured = defined('PUBLIC_ROOT') ? trim((string) PUBLIC_ROOT) : '';
+    if ($configured !== '') {
+        $real = realpath($configured);
+        return ($real !== false && is_dir($real)) ? $real : null;
+    }
+    $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? trim((string) $_SERVER['DOCUMENT_ROOT']) : '';
+    if ($docRoot === '') {
+        return null;
+    }
+    $real = realpath($docRoot);
+    return ($real !== false && is_dir($real)) ? $real : null;
 }
 
 /** True when $path equals or is below $parent, accounting for Windows paths. */
