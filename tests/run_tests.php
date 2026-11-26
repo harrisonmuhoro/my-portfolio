@@ -386,12 +386,32 @@ if (is_string($newToken) && $newToken !== '') {
     $itSecond = $mkSpec(['csrf_token' => $newToken], [], $providerEnv);
     $itSecond['session_id'] = $itSessionId;
     $r2 = probe($itSecond);
+    $tokenB = $r2['json']['csrf_token'] ?? null;
     ok(($r2['json']['success'] ?? false) === true && $r2['http'] === 200,
         'IT support rotated token succeeds in the same persisted PHP session');
+    ok(is_string($tokenB) && $tokenB !== '' && $tokenB !== $newToken,
+        'second IT support success rotates the token again');
+
+    // Token A must be dead now that token B replaced it in the session.
+    $itStale = $mkSpec(['csrf_token' => $newToken], [], $providerEnv);
+    $itStale['session_id'] = $itSessionId;
+    $r3 = probe($itStale);
+    ok($r3['http'] === 403, 'superseded IT support token rejected after second rotation');
+
+    // The original token stays rejected too.
     $itOld = $mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv);
     $itOld['session_id'] = $itSessionId;
-    $r3 = probe($itOld);
-    ok($r3['http'] === 403, 'old IT support token rejected in that same session');
+    $r4 = probe($itOld);
+    ok($r4['http'] === 403, 'original IT support token still rejected');
+
+    // Token B is the live one — next submission succeeds.
+    if (is_string($tokenB) && $tokenB !== '') {
+        $itThird = $mkSpec(['csrf_token' => $tokenB], [], $providerEnv);
+        $itThird['session_id'] = $itSessionId;
+        $r5 = probe($itThird);
+        ok(($r5['json']['success'] ?? false) === true && $r5['http'] === 200,
+            'newest IT support token accepted in the same session');
+    }
 }
 
 $contactSessionId = 'contactrotate' . bin2hex(random_bytes(8));
@@ -406,12 +426,32 @@ if (is_string($cNewToken) && $cNewToken !== '') {
     $contactSecond = $mkContact(['csrf_token' => $cNewToken], [], $providerEnv);
     $contactSecond['session_id'] = $contactSessionId;
     $c2 = probe($contactSecond);
+    $cTokenB = $c2['json']['csrf_token'] ?? null;
     ok(($c2['json']['success'] ?? false) === true && $c2['http'] === 200,
         'contact rotated token succeeds in the same persisted PHP session');
+    ok(is_string($cTokenB) && $cTokenB !== '' && $cTokenB !== $cNewToken,
+        'second contact success rotates the token again');
+
+    // Token A must be dead now that token B replaced it in the session.
+    $contactStale = $mkContact(['csrf_token' => $cNewToken], [], $providerEnv);
+    $contactStale['session_id'] = $contactSessionId;
+    $c3 = probe($contactStale);
+    ok($c3['http'] === 403, 'superseded contact token rejected after second rotation');
+
+    // The original token stays rejected too.
     $contactOld = $mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv);
     $contactOld['session_id'] = $contactSessionId;
-    $c3 = probe($contactOld);
-    ok($c3['http'] === 403, 'old contact token rejected in that same session');
+    $c4 = probe($contactOld);
+    ok($c4['http'] === 403, 'original contact token still rejected');
+
+    // Token B is the live one — next submission succeeds.
+    if (is_string($cTokenB) && $cTokenB !== '') {
+        $contactThird = $mkContact(['csrf_token' => $cTokenB], [], $providerEnv);
+        $contactThird['session_id'] = $contactSessionId;
+        $c5 = probe($contactThird);
+        ok(($c5['json']['success'] ?? false) === true && $c5['http'] === 200,
+            'newest contact token accepted in the same session');
+    }
 }
 cleanup_probe_session($itSessionId);
 cleanup_probe_session($contactSessionId);
@@ -517,6 +557,47 @@ foreach ((array) glob($insideOvr . DIRECTORY_SEPARATOR . '*.json') as $file) { @
 @rmdir($insideOvr);
 @rmdir($pubOverride);
 @rmdir($noRootDir);
+
+// Pre-existing directory outside the public root is accepted as-is.
+$preWeb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_prew_' . bin2hex(random_bytes(6));
+$preDir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_pred_' . bin2hex(random_bytes(6));
+mkdir($preWeb);
+mkdir($preDir);
+$preSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $preDir,
+]);
+$preSpec['host'] = 'portfolio.example';
+$preSpec['document_root'] = $preWeb;
+$r = probe($preSpec);
+ok($r['http'] === 503, 'production accepts a pre-existing directory outside the public root');
+foreach ((array) glob($preDir . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($preDir);
+@rmdir($preWeb);
+
+// Symlink that resolves INTO the public root must be rejected — the
+// post-creation realpath check is what catches it.
+$lnkWeb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_lnkw_' . bin2hex(random_bytes(6));
+$lnkTarget = $lnkWeb . DIRECTORY_SEPARATOR . 'real_store';
+$lnkLink = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_lnk_' . bin2hex(random_bytes(6));
+mkdir($lnkWeb);
+mkdir($lnkTarget);
+if (@symlink($lnkTarget, $lnkLink)) {
+    $lnkSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+        'APP_ENV' => 'production',
+        'RATE_LIMIT_DIR' => $lnkLink,
+    ]);
+    $lnkSpec['host'] = 'portfolio.example';
+    $lnkSpec['document_root'] = $lnkWeb;
+    $r = probe($lnkSpec);
+    ok($r['http'] === 429, 'production rejects a symlink resolving inside the public root');
+    @unlink($lnkLink);
+} else {
+    echo "  SKIP  symlink test (symlink() unavailable on this platform)\n";
+}
+foreach ((array) glob($lnkTarget . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($lnkTarget);
+@rmdir($lnkWeb);
 
 $localFallback = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv);
 $r = probe($localFallback);

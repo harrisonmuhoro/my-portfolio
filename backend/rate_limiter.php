@@ -85,6 +85,9 @@ function rl_storage_dir(): string {
     }
 
     foreach ($candidates as $dir) {
+        if ($production && !rl_prevalidate_prod_dir($dir, $publicRoot)) {
+            return ''; // reason already logged — fail closed
+        }
         if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
             error_log('[RateLimiter] cannot create storage directory: ' . $dir);
             continue;
@@ -94,6 +97,8 @@ function rl_storage_dir(): string {
             continue;
         }
         if ($production) {
+            // Post-creation canonical re-check: catches symlinked ancestors
+            // and filesystem changes between the pre-check and mkdir.
             $resolvedDir = realpath($dir);
             if ($resolvedDir === false || rl_path_is_within($resolvedDir, $publicRoot)) {
                 error_log('[RateLimiter] production RATE_LIMIT_DIR must resolve outside the public web root');
@@ -106,6 +111,68 @@ function rl_storage_dir(): string {
 
     error_log('[RateLimiter] no writable storage directory available');
     return '';
+}
+
+/**
+ * Lexically normalize a path: collapse duplicate separators, resolve '.'
+ * and '..' segments without touching the filesystem (works for paths that
+ * do not exist yet). Keeps a leading root prefix intact.
+ */
+function rl_normalize_path(string $path): string {
+    $isAbsolute = (bool) preg_match('~^([A-Za-z]:)?[\\/]~', $path);
+    $prefix = '';
+    if ($isAbsolute) {
+        if (preg_match('~^[A-Za-z]:[\\/]~', $path)) {
+            $prefix = substr($path, 0, 2);
+            $path = substr($path, 2);
+        } else {
+            $prefix = '/';
+            $path = ltrim($path, '/\\');
+        }
+    }
+    $out = [];
+    foreach (preg_split('~[\\/]+~', $path) as $seg) {
+        if ($seg === '' || $seg === '.') { continue; }
+        if ($seg === '..') {
+            if ($out !== [] && end($out) !== '..') { array_pop($out); }
+            elseif (!$isAbsolute) { $out[] = '..'; }
+            continue;
+        }
+        $out[] = $seg;
+    }
+    $joined = implode('/', $out);
+    if ($prefix === '/') { return '/' . $joined; }
+    return $prefix . ($joined !== '' ? '/' . $joined : '');
+}
+
+/**
+ * Pre-creation validation for a production RATE_LIMIT_DIR.
+ * Canonicalizes the configured path, walks up to the nearest existing
+ * ancestor, and rejects the path BEFORE any directory is created when the
+ * ancestor resolves inside the public web root. Returns false (and logs)
+ * when the path cannot be verified — callers fail closed.
+ */
+function rl_prevalidate_prod_dir(string $dir, string $publicRoot): bool {
+    $norm = rl_normalize_path($dir);
+
+    // Nearest existing ancestor — its canonical path decides whether the
+    // final directory would land inside the public root.
+    $ancestor = $norm;
+    while (!file_exists($ancestor)) {
+        $parent = dirname($ancestor);
+        if ($parent === $ancestor) { break; }
+        $ancestor = $parent;
+    }
+    $ancestorReal = realpath($ancestor);
+    if ($ancestorReal === false) {
+        error_log('[RateLimiter] cannot resolve ancestor of RATE_LIMIT_DIR');
+        return false;
+    }
+    if (rl_path_is_within($ancestorReal, $publicRoot)) {
+        error_log('[RateLimiter] RATE_LIMIT_DIR resolves inside the public web root');
+        return false;
+    }
+    return true;
 }
 
 /**
