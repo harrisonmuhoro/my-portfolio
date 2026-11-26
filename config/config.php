@@ -178,7 +178,10 @@ if (!function_exists('app_session_start')) {
         session_set_cookie_params([
             'lifetime' => 0,              // Session cookie (expires on browser close)
             'path'     => '/',
-            'domain'   => $_SERVER['HTTP_HOST'] ?? '',
+            // No 'domain' — host-only cookie. HTTP_HOST is request-controlled
+            // (and may carry a port locally); the session belongs to the
+            // exact host that issued it. Cross-subdomain sessions are not
+            // needed anywhere in this app.
             'secure'   => $is_secure,      // Only send over HTTPS in production
             'httponly'  => true,           // Prevent JavaScript access
             'samesite'  => 'Lax',          // CSRF protection

@@ -26,5 +26,9 @@ Disallow: /config/
 Disallow: /vendor/
 Disallow: /includes/
 
+# Private rate-limit counter storage (not access control — the directory
+# also carries its own .htaccess deny; this just keeps crawlers out)
+Disallow: /storage/
+
 # Sitemap
 Sitemap: <?= $baseUrl ?>/sitemap.xml

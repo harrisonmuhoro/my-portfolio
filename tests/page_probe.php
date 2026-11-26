@@ -52,7 +52,9 @@ $_COOKIE = [];
 if ($router) {
     // index.php defines PROJECT_ROOT itself and owns the session decision.
     require $root . '/index.php';
-    echo "\n<!--probe:session_status=" . session_status() . "-->\n";
+    $cp = session_status() === PHP_SESSION_ACTIVE ? session_get_cookie_params() : [];
+    echo "\n<!--probe:session_status=" . session_status()
+       . ";cookie=" . htmlspecialchars(json_encode($cp), ENT_QUOTES) . "-->\n";
     exit;
 }
 
