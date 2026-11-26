@@ -11,8 +11,11 @@
     const errorText   = document.getElementById('form-error-text');
 
     // ── Validation helpers ──────────────────────
-    function showError(groupId, message) {
-        const group = document.getElementById(groupId);
+    // Errors are shown per-field: a field is validated on blur/change and
+    // re-checked on input once it has an error, so untouched fields never
+    // show errors prematurely.
+    function showError(fieldId, message) {
+        const group = document.getElementById('group-' + fieldId);
         if (!group) return;
         const errEl = group.querySelector('.form-error');
         const input = group.querySelector('.form-input');
@@ -21,8 +24,8 @@
         group.classList.add('has-error');
     }
 
-    function clearError(groupId) {
-        const group = document.getElementById(groupId);
+    function clearError(fieldId) {
+        const group = document.getElementById('group-' + fieldId);
         if (!group) return;
         const errEl = group.querySelector('.form-error');
         const input = group.querySelector('.form-input');
@@ -31,56 +34,76 @@
         group.classList.remove('has-error');
     }
 
+    function el(id) {
+        return document.getElementById(id);
+    }
+
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Per-field validators: return an error message or '' when valid.
+    const FIELD_IDS = ['name', 'email', 'subject', 'message'];
+    const validators = {
+        name: function () {
+            const v = el('name');
+            return !v || v.value.trim().length >= 2 ? '' : 'Please enter your name.';
+        },
+        email: function () {
+            const v = el('email');
+            return v && emailRe.test(v.value.trim()) ? '' : 'Please enter a valid email address.';
+        },
+        subject: function () {
+            const v = el('subject');
+            return v && v.value.trim().length >= 5 ? '' : 'Please enter a subject (min 5 characters).';
+        },
+        message: function () {
+            const v = el('message');
+            return v && v.value.trim().length >= 20 ? '' : 'Please write a message (min 20 characters).';
+        }
+    };
+
+    // Validate one field; returns true when valid.
+    function validateField(fieldId) {
+        const message = validators[fieldId] ? validators[fieldId]() : '';
+        if (message === '') {
+            clearError(fieldId);
+            return true;
+        }
+        showError(fieldId, message);
+        return false;
+    }
+
     function validateForm() {
         let valid = true;
-
-        const name    = document.getElementById('name');
-        const email   = document.getElementById('email');
-        const subject = document.getElementById('subject');
-        const message = document.getElementById('message');
-
-        clearError('group-name');
-        clearError('group-email');
-        clearError('group-subject');
-        clearError('group-message');
-
-        if (!name || name.value.trim().length < 2) {
-            showError('group-name', 'Please enter your name.');
-            valid = false;
-        }
-
-        const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email || !emailRe.test(email.value.trim())) {
-            showError('group-email', 'Please enter a valid email address.');
-            valid = false;
-        }
-
-        if (!subject || subject.value.trim().length < 5) {
-            showError('group-subject', 'Please enter a subject (min 5 characters).');
-            valid = false;
-        }
-
-        if (!message || message.value.trim().length < 20) {
-            showError('group-message', 'Please write a message (min 20 characters).');
-            valid = false;
-        }
-
+        FIELD_IDS.forEach(function (fieldId) {
+            if (!validateField(fieldId)) valid = false;
+        });
         return valid;
     }
 
-    // ── Live validation on blur ─────────────────
-    ['name', 'email', 'subject', 'message'].forEach(function (fieldId) {
-        const el = document.getElementById(fieldId);
-        if (el) {
-            el.addEventListener('blur', function () { validateForm(); });
-        }
+    // ── Live validation: blur validates, input re-checks errors ──
+    FIELD_IDS.forEach(function (fieldId) {
+        const input = el(fieldId);
+        if (!input) return;
+        input.addEventListener('blur', function () { validateField(fieldId); });
+        input.addEventListener('input', function () {
+            const group = el('group-' + fieldId);
+            if (group && group.classList.contains('has-error')) {
+                validateField(fieldId);
+            }
+        });
+        input.addEventListener('change', function () { validateField(fieldId); });
     });
 
     // ── Submit ──────────────────────────────────
+    let submitting = false;
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
+        if (submitting) return;
         if (!validateForm()) return;
+
+        submitting = true;
 
         // Hide previous feedback
         if (successEl) successEl.hidden = true;
@@ -108,6 +131,12 @@
             if (json.success) {
                 if (successEl) successEl.hidden = false;
                 form.reset();
+                // Server rotates the CSRF token on success — adopt the new
+                // one or the next submission without refresh gets a 403.
+                if (json.csrf_token) {
+                    const csrfInput = form.querySelector('input[name="csrf_token"]');
+                    if (csrfInput) csrfInput.value = json.csrf_token;
+                }
             } else {
                 throw new Error(json.message || 'Unexpected error.');
             }
@@ -117,6 +146,7 @@
             if (errorText) errorText.textContent = err.message || 'Something went wrong. Please contact me directly.';
         })
         .finally(function () {
+            submitting = false;
             if (submitBtn)  submitBtn.disabled = false;
             if (submitLabel) submitLabel.textContent = 'Send Message';
         });

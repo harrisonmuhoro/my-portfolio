@@ -111,7 +111,7 @@ function it_dictionary(): array {
 
                 // ── Form ──
                 'form_title'       => 'Request your quotation',
-                'form_sub'         => 'Fill this in and I will get back to you.',
+                'form_sub'         => 'Fill this in and send your request.',
                 'f_name'           => 'Full name',
                 'f_phone'          => 'Phone / WhatsApp',
                 'f_email'          => 'Email (optional)',
@@ -126,7 +126,7 @@ function it_dictionary(): array {
                 'f_lang'           => 'Preferred language',
                 'f_submit'         => 'Send request',
                 'f_sending'        => 'Sending…',
-                'f_success'        => 'Request received — I will reply with a quotation soon.',
+                'f_success'        => 'Request received — thank you.',
                 'f_privacy'        => 'Your details are only used to respond to this request.',
 
                 'cat_network'      => 'Network installation & configuration',
@@ -219,7 +219,7 @@ function it_dictionary(): array {
                 'del_scope_langlist' => 'Kiingereza na Kiswahili',
 
                 'form_title'       => 'Omba nukuu ya bei',
-                'form_sub'         => 'Jaza fomu hii nitakujibu.',
+                'form_sub'         => 'Jaza fomu hii kutuma ombi lako.',
                 'f_name'           => 'Jina kamili',
                 'f_phone'          => 'Simu / WhatsApp',
                 'f_email'          => 'Barua pepe (hiari)',
@@ -234,7 +234,7 @@ function it_dictionary(): array {
                 'f_lang'           => 'Lugha unayopendelea',
                 'f_submit'         => 'Tuma ombi',
                 'f_sending'        => 'Inatuma…',
-                'f_success'        => 'Ombi limepokelewa — nitakujibu na nukuu hivi karibuni.',
+                'f_success'        => 'Ombi limepokelewa — asante.',
                 'f_privacy'        => 'Taarifa zako hutumika tu kujibu ombi hili.',
 
                 'cat_network'      => 'Ufunguzi na usanidi wa mtandao',

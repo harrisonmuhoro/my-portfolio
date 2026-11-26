@@ -192,6 +192,12 @@
             if (json.success) {
                 if (successEl) successEl.hidden = false;
                 form.reset();
+                // Server rotates the CSRF token on success — adopt the new
+                // one or the next submission without refresh gets a 403.
+                if (json.csrf_token) {
+                    var csrfInput = form.querySelector('input[name="csrf_token"]');
+                    if (csrfInput) csrfInput.value = json.csrf_token;
+                }
                 syncLocationRequirement();
             } else {
                 throw new Error(json.message || t('err_generic'));

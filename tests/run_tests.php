@@ -78,10 +78,17 @@ sleep(2);
 ok(rate_limit_hit($bucket2, 1, 1) === 0, 'counter resets after window expires');
 
 $rlDir = rl_storage_dir();
-ok($rlDir !== '' && str_contains(str_replace('\\', '/', $rlDir), '/storage/'),
-    'rate-limit storage resolves to persistent project storage dir');
-ok(is_file($rlDir . DIRECTORY_SEPARATOR . '.htaccess'),
-    'web guard .htaccess written for in-root storage dir');
+$rlDirNorm = str_replace('\\', '/', $rlDir);
+ok($rlDir !== '' && is_dir($rlDir) && is_writable($rlDir),
+    'rate-limit storage resolves to a writable directory');
+// Guard files are only required when state lives inside the project root.
+if (str_starts_with($rlDirNorm, str_replace('\\', '/', PROJECT_ROOT))) {
+    ok(is_file($rlDir . DIRECTORY_SEPARATOR . '.htaccess'),
+        'web guard .htaccess written for in-root storage dir');
+} else {
+    ok(!str_contains($rlDirNorm, '/storage/'),
+        'preferred storage is outside the project web root');
+}
 
 // ── mailer helpers ──────────────────────────────────────────
 echo "== mailer ==\n";
@@ -334,6 +341,44 @@ for ($i = 0; $i < FORM_RATE_LIMIT + 1; $i++) {
 }
 ok(in_array(429, $codes, true), 'rate limit returns 429 after ' . FORM_RATE_LIMIT . ' submissions (got: ' . implode(',', $codes) . ')');
 ok(end($codes) === 429, 'the (limit+1)th request is the blocked one');
+
+// ── CSRF rotation: repeat submission without page refresh ────
+echo "== CSRF token rotation ==\n";
+
+// First submission succeeds and returns a rotated token. The second
+// submission reuses that token (as the browser would after JS updates the
+// hidden field) — it must NOT hit a 403.
+$r1 = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv));
+$newToken = $r1['json']['csrf_token'] ?? null;
+ok(($r1['json']['success'] ?? false) === true
+    && is_string($newToken) && $newToken !== '' && $newToken !== 'test-token-123',
+    'IT support success returns a rotated csrf_token');
+
+if (is_string($newToken) && $newToken !== '') {
+    $r2 = probe($mkSpec(['csrf_token' => $newToken], ['csrf_token' => $newToken], $providerEnv));
+    ok(($r2['json']['success'] ?? false) === true && $r2['http'] === 200,
+        'second IT support submission with rotated token succeeds (no 403)');
+
+    // The pre-rotation token must now be rejected.
+    $r3 = probe($mkSpec(['csrf_token' => 'test-token-123'], ['csrf_token' => $newToken], $providerEnv));
+    ok($r3['http'] === 403, 'old IT support token rejected after rotation');
+}
+
+$c1 = probe($mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv));
+$cNewToken = $c1['json']['csrf_token'] ?? null;
+ok(($c1['json']['success'] ?? false) === true
+    && is_string($cNewToken) && $cNewToken !== '' && $cNewToken !== 'test-token-123',
+    'contact success returns a rotated csrf_token');
+
+if (is_string($cNewToken) && $cNewToken !== '') {
+    $c2 = probe($mkContact(['csrf_token' => $cNewToken], ['csrf_token' => $cNewToken], $providerEnv));
+    ok(($c2['json']['success'] ?? false) === true && $c2['http'] === 200,
+        'second contact submission with rotated token succeeds (no 403)');
+
+    // The pre-rotation token must now be rejected.
+    $c3 = probe($mkContact(['csrf_token' => 'test-token-123'], ['csrf_token' => $cNewToken], $providerEnv));
+    ok($c3['http'] === 403, 'old contact token rejected after rotation');
+}
 
 // ── Rate limiter failure policy ──────────────────────────────
 echo "== rate limiter failure policy ==\n";

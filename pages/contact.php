@@ -19,7 +19,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                     <span class="section-heading__label">Contact</span>
                     <h1 class="contact-page__title reveal">A note is enough.</h1>
                     <p class="contact-page__desc reveal">
-                        I take full-time roles, freelance work, and consulting. On weekdays I usually reply within a day.
+                        I take full-time roles, freelance work, and consulting.
                     </p>
 
                     <div class="contact-page__availability reveal">
@@ -128,7 +128,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                         </button>
 
                         <div class="form-feedback form-feedback--success" id="form-success" role="status" aria-live="polite" hidden>
-                            Received — I will reply within a weekday.
+                            Message received — thank you for reaching out.
                         </div>
                         <div class="form-feedback form-feedback--error" id="form-error" role="alert" aria-live="assertive" hidden>
                             <span id="form-error-text">Something went wrong. Email me directly instead.</span>

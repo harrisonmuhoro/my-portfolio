@@ -4,11 +4,11 @@ require_once __DIR__ . '/rate_limiter.php';
 require_once __DIR__ . '/mailer.php';
 
 // ── Response helper ─────────────────────────────────────────
-function json_response(bool $success, string $message, int $http_code = 200): void {
+function json_response(bool $success, string $message, int $http_code = 200, array $extra = []): void {
     http_response_code($http_code);
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
-    echo json_encode(['success' => $success, 'message' => $message]);
+    echo json_encode(['success' => $success, 'message' => $message] + $extra);
     exit;
 }
 
@@ -41,7 +41,7 @@ $retry_after = rate_limit_hit(rl_client_key('contact'), FORM_RATE_LIMIT, $rate_w
 if ($retry_after > 0) {
     header('Retry-After: ' . $retry_after);
     json_response(false, 'Too many submissions. Please try again in an hour.', 429);
-}
+} 
 
 // ── Sanitize & validate inputs ───────────────────────────────
 /**
@@ -133,10 +133,14 @@ $email_body .= "Reply directly to: " . $email . "\n";
 $sent = portfolio_send_mail($email_subject, $email_body, $email, $name);
 
 if ($sent) {
-    // Regenerate CSRF token after successful submission
+    // Regenerate CSRF token after successful submission and return it so
+    // the frontend can update the hidden field — otherwise the next
+    // submission without a page refresh would fail with 403.
     $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
 
-    json_response(true, 'Message sent successfully! I will get back to you within 24 hours.');
+    json_response(true, 'Message sent successfully!', 200, [
+        'csrf_token' => $_SESSION[CSRF_TOKEN_NAME],
+    ]);
 } else {
     json_response(false, 'Email delivery failed. Please contact me directly at ' . EMAIL_ADDRESS, 503);
 }

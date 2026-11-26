@@ -5,11 +5,11 @@ require_once __DIR__ . '/rate_limiter.php';
 require_once __DIR__ . '/mailer.php';
 
 // ── Response helper ─────────────────────────────────────────
-function json_response(bool $success, string $message, int $http_code = 200): void {
+function json_response(bool $success, string $message, int $http_code = 200, array $extra = []): void {
     http_response_code($http_code);
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
-    echo json_encode(['success' => $success, 'message' => $message]);
+    echo json_encode(['success' => $success, 'message' => $message] + $extra);
     exit;
 }
 
@@ -172,10 +172,14 @@ $email_body .= $description . "\n";
 $sent = portfolio_send_mail($email_subject, $email_body, $email, $name);
 
 if ($sent) {
-    // Regenerate CSRF token after successful submission
+    // Regenerate CSRF token after successful submission and return it so
+    // the frontend can update the hidden field — otherwise the next
+    // submission without a page refresh would fail with 403.
     $_SESSION[CSRF_TOKEN_NAME] = bin2hex(random_bytes(32));
 
-    json_response(true, t('f_success', $request_lang));
+    json_response(true, t('f_success', $request_lang), 200, [
+        'csrf_token' => $_SESSION[CSRF_TOKEN_NAME],
+    ]);
 } else {
     json_response(false, t('err_server', $request_lang), 503);
 }

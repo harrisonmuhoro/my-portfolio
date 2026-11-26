@@ -9,12 +9,14 @@
  *
  * STORAGE & FAILURE POLICY
  * ------------------------
- * - State lives in RATE_LIMIT_DIR when configured, otherwise
- *   PROJECT_ROOT/storage/rate_limits (persistent app storage — survives
- *   temp-dir cleanup on PaaS hosts), falling back to the system temp dir.
- *   Point RATE_LIMIT_DIR at a mounted volume if the host filesystem is
- *   ephemeral. Guard files (.htaccess / index.php) are written automatically
- *   when storage sits inside the web root.
+ * - State lives in RATE_LIMIT_DIR when configured. Otherwise the first
+ *   writable of: a sibling directory next to DOCUMENT_ROOT (outside the
+ *   web root on Apache-style hosts), PROJECT_ROOT/storage/rate_limits,
+ *   then the system temp dir. Point RATE_LIMIT_DIR at a persistent
+ *   directory outside the public web root in production — the in-project
+ *   fallback relies on Apache access controls, and .htaccess/index.php
+ *   guards are defense-in-depth only, NOT a universal protection
+ *   mechanism (they do nothing on nginx or misconfigured Apache).
  * - Designed for a single application instance with a shared local
  *   filesystem (WAMP, typical shared hosting, single-container PaaS such as
  *   Wasmer Edge). If the app ever runs across multiple instances/containers
@@ -53,6 +55,13 @@ function rl_storage_dir(): string {
     if (defined('RATE_LIMIT_DIR') && trim((string) RATE_LIMIT_DIR) !== '') {
         $candidates[] = rtrim((string) RATE_LIMIT_DIR, '/\\');
     } else {
+        // Preferred fallback: a directory beside DOCUMENT_ROOT — outside the
+        // served tree on Apache-style hosts. Skipped when DOCUMENT_ROOT is
+        // unset/unreliable (e.g. some PaaS runtimes).
+        $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? trim((string) $_SERVER['DOCUMENT_ROOT']) : '';
+        if ($docRoot !== '' && !in_array($docRoot, ['/', '\\'], true)) {
+            $candidates[] = dirname(rtrim($docRoot, '/\\')) . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
+        }
         $candidates[] = PROJECT_ROOT . DIRECTORY_SEPARATOR . 'storage'
                       . DIRECTORY_SEPARATOR . 'rate_limits';
         $candidates[] = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'hm_portfolio_rl';
