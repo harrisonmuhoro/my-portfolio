@@ -1,4 +1,6 @@
 <?php
+$page_title       = 'Harrison Muhoro – Software Engineer & Web Developer in Kenya';
+$page_description = 'Harrison Muhoro is a software engineer and web developer based in Nyeri, Kenya. Explore selected projects, technical skills, certifications and IT support services.';
 $page_css = ['home'];
 require_once __DIR__ . '/../includes/header.php';
 

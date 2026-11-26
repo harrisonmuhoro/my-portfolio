@@ -290,26 +290,23 @@ $steps = [
 </main>
 
 <!-- ── Page-specific structured data ── -->
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "IT Support & Networking Services",
-    "description": <?= json_encode(t('meta_desc'), JSON_UNESCAPED_UNICODE) ?>,
-    "provider": {
-        "@type": "Person",
-        "name": <?= json_encode(OWNER_NAME) ?>,
-        "url": <?= json_encode(SITE_URL) ?>
-    },
-    "areaServed": {
-        "@type": "City",
-        "name": "Nyeri",
-        "containedInPlace": { "@type": "Country", "name": "Kenya" }
-    },
-    "availableLanguage": ["English", "Kiswahili"],
-    "serviceType": ["Computer repair", "Network installation", "IT support", "Data recovery", "Malware removal"]
-}
-</script>
+<?php
+seo_jsonld([
+    '@context'    => 'https://schema.org',
+    '@type'       => 'Service',
+    'name'        => 'IT Support & Networking Services',
+    'description' => t('meta_desc'),
+    // References the canonical Person entity — no duplicate identity.
+    'provider'    => ['@id' => PERSON_ID],
+    'areaServed'  => [
+        '@type'            => 'City',
+        'name'             => 'Nyeri',
+        'containedInPlace' => ['@type' => 'Country', 'name' => 'Kenya'],
+    ],
+    'availableLanguage' => ['English', 'Kiswahili'],
+    'serviceType'       => ['Computer repair', 'Network installation', 'IT support', 'Data recovery', 'Malware removal'],
+]);
+?>
 
 <script>
 window.ITS_I18N = <?= json_encode([

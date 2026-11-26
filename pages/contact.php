@@ -1,4 +1,6 @@
 <?php
+$page_title       = 'Contact Harrison Muhoro – Software Developer in Kenya';
+$page_description = 'Get in touch with Harrison Muhoro, a software developer in Nyeri, Kenya. Email, WhatsApp, phone and social channels for project enquiries.';
 $page_css = ['contact'];
 require_once __DIR__ . '/../includes/header.php';
 

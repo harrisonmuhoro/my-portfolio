@@ -190,6 +190,28 @@ function cleanup_probe_session(string $id): void {
     @unlink(rtrim($savePath, '/\\') . DIRECTORY_SEPARATOR . 'sess_' . $id);
 }
 
+/**
+ * Render a real page through tests/page_probe.php and return its HTML/XML.
+ */
+function page_probe(array $spec): string {
+    $file = tempnam(sys_get_temp_dir(), 'page_') . '.json';
+    file_put_contents($file, json_encode($spec));
+    $process = proc_open([PHP_BINARY, '-d', 'xdebug.mode=off', PROJECT_ROOT . '/tests/page_probe.php', $file],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    $out = '';
+    if (is_resource($process)) {
+        fclose($pipes[0]);
+        $out = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+        if ($stderr !== '') { error_log(trim($stderr)); }
+    }
+    @unlink($file);
+    return $out;
+}
+
 $basePost = [
     'name'        => 'Test User',
     'phone'       => '+254726300091',
@@ -687,6 +709,135 @@ $r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
 ok($r['http'] === 503, 'fail-open policy (default) still allows request when storage unusable');
 
 @unlink($badDirFile);
+
+// ── SEO: rendered-page metadata, structured data, hreflang ───
+echo "== SEO ==\n";
+
+$seoPages = [
+    '/'         => 'home-redesign.php',
+    '/about'    => 'about.php',
+    '/services' => 'services.php',
+    '/projects' => 'projects.php',
+    '/contact'  => 'contact.php',
+];
+$seoHtml = [];
+foreach ($seoPages as $uri => $page) {
+    $seoHtml[$uri] = page_probe(['page' => $page, 'uri' => $uri, 'host' => 'www.harrisonmuhoro.me']);
+}
+$seoHtml['/it-support?lang=en'] = page_probe(['page' => 'it-support.php', 'uri' => '/it-support', 'get' => ['lang' => 'en'], 'host' => 'www.harrisonmuhoro.me']);
+$seoHtml['/it-support?lang=sw'] = page_probe(['page' => 'it-support.php', 'uri' => '/it-support', 'get' => ['lang' => 'sw'], 'host' => 'www.harrisonmuhoro.me']);
+
+$seoTitle = function (string $html): ?string {
+    return preg_match('~<title>(.*?)</title>~s', $html, $m) ? trim(html_entity_decode($m[1])) : null;
+};
+$seoDesc = function (string $html): ?string {
+    return preg_match('~<meta name="description" content="([^"]*)"~', $html, $m) ? html_entity_decode($m[1]) : null;
+};
+$seoCanon = function (string $html): ?string {
+    return preg_match('~<link rel="canonical"\s+href="([^"]+)"~', $html, $m) ? html_entity_decode($m[1]) : null;
+};
+$seoLd = function (string $html): array {
+    preg_match_all('~<script type="application/ld\+json">(.*?)</script>~s', $html, $m);
+    $out = [];
+    foreach (($m[1] ?? []) as $block) {
+        $decoded = json_decode(trim($block), true);
+        if (is_array($decoded)) { $out[] = $decoded; }
+    }
+    return $out;
+};
+$seoFindType = function (array $nodes, string $type): array {
+    return array_values(array_filter($nodes, fn($n) => ($n['@type'] ?? '') === $type));
+};
+
+$titles = array_map($seoTitle, $seoHtml);
+$descs  = array_map($seoDesc, $seoHtml);
+ok(count(array_unique(array_filter($titles))) === count($seoHtml) && !in_array(null, $titles, true),
+    'every public page has a unique non-empty <title>');
+ok(count(array_unique(array_filter($descs))) === count($seoHtml) && !in_array(null, $descs, true),
+    'every public page has a unique non-empty meta description');
+
+// Canonicals: plain routes point at the clean production URL.
+$canonOk = true;
+foreach ($seoPages as $uri => $page) {
+    $expected = 'https://www.harrisonmuhoro.me' . $uri;
+    if (($seoCanon($seoHtml[$uri]) ?? '') !== $expected) { $canonOk = false; }
+}
+ok($canonOk, 'non-i18n pages canonicalize to https://www.harrisonmuhoro.me/<path>');
+
+// Language canonicals + reciprocal hreflang.
+ok(($seoCanon($seoHtml['/it-support?lang=en']) ?? '') === 'https://www.harrisonmuhoro.me/it-support?lang=en',
+    'English IT Support canonical is ?lang=en');
+ok(($seoCanon($seoHtml['/it-support?lang=sw']) ?? '') === 'https://www.harrisonmuhoro.me/it-support?lang=sw',
+    'Kiswahili IT Support canonical is ?lang=sw');
+foreach (['en', 'sw', 'x-default'] as $hl) {
+    ok(str_contains($seoHtml['/it-support?lang=sw'], 'rel="alternate" hreflang="' . $hl . '"'),
+        "Kiswahili page emits hreflang=\"$hl\"");
+}
+ok($seoTitle($seoHtml['/it-support?lang=en']) !== $seoTitle($seoHtml['/it-support?lang=sw']),
+    'EN and SW IT Support pages render different titles');
+
+// Person entity: one canonical @id, approved sameAs only.
+$homeLd = $seoLd($seoHtml['/']);
+$people = [];
+foreach ($homeLd as $node) { $people = array_merge($people, $seoFindType([$node], 'Person')); }
+ok(count($people) === 1 && ($people[0]['@id'] ?? '') === 'https://www.harrisonmuhoro.me/#person',
+    'homepage emits exactly one Person with the stable @id');
+$sameAs = $people[0]['sameAs'] ?? [];
+sort($sameAs);
+ok($sameAs === ['https://github.com/harrisonmuhoro', 'https://linkedin.com/in/zion-harrison'],
+    'Person sameAs contains only the approved identity profiles');
+ok(!preg_grep('~mailto:|wa\.me~', $sameAs), 'Person sameAs excludes email and WhatsApp');
+
+// About: ProfilePage referencing the canonical Person.
+$aboutLd = $seoLd($seoHtml['/about']);
+$profiles = [];
+foreach ($aboutLd as $node) { $profiles = array_merge($profiles, $seoFindType([$node], 'ProfilePage')); }
+ok(count($profiles) === 1
+    && ($profiles[0]['mainEntity']['@id'] ?? '') === 'https://www.harrisonmuhoro.me/#person'
+    && str_ends_with($profiles[0]['url'] ?? '', '/about'),
+    'about page emits ProfilePage referencing the canonical Person @id');
+
+// IT Support: Service provider references @id; still exactly one Person node.
+$itLd = $seoLd($seoHtml['/it-support?lang=en']);
+$itPeople = $itServices = [];
+foreach ($itLd as $node) {
+    $itPeople    = array_merge($itPeople,    $seoFindType([$node], 'Person'));
+    $itServices  = array_merge($itServices,  $seoFindType([$node], 'Service'));
+}
+ok(count($itPeople) === 1, 'IT Support page has exactly one Person entity (no duplicates)');
+ok(count($itServices) === 1
+    && ($itServices[0]['provider']['@id'] ?? '') === 'https://www.harrisonmuhoro.me/#person',
+    'IT Support Service.provider references the canonical Person @id');
+
+// Every emitted JSON-LD block must be valid JSON (XSS/encoding safety).
+$badJson = 0;
+foreach ($seoHtml as $h) {
+    preg_match_all('~<script type="application/ld\+json">(.*?)</script>~s', $h, $m);
+    foreach (($m[1] ?? []) as $block) {
+        if (json_decode(trim($block), true) === null && trim($block) !== 'null') { $badJson++; }
+    }
+}
+ok($badJson === 0, 'all JSON-LD blocks are valid JSON');
+
+// Sitemap: valid XML-ish, canonical host, both languages, real images.
+$sitemap = page_probe(['page' => 'sitemap.xml.php', 'uri' => '/sitemap.xml', 'host' => 'www.harrisonmuhoro.me']);
+ok(str_contains($sitemap, '<urlset') && str_contains($sitemap, '</urlset>'), 'sitemap emits a urlset');
+ok(str_contains($sitemap, 'https://www.harrisonmuhoro.me/it-support?lang=en')
+    && str_contains($sitemap, 'https://www.harrisonmuhoro.me/it-support?lang=sw'),
+    'sitemap lists both IT Support language URLs');
+ok(!str_contains($sitemap, 'harrisonmuhoro.me/it-support<') && substr_count($sitemap, '/it-support') >= 2,
+    'sitemap has no bare duplicate /it-support entry');
+$imgLocs = [];
+preg_match_all('~<image:loc>(.*?)</image:loc>~', $sitemap, $im);
+foreach (($im[1] ?? []) as $loc) {
+    $imgLocs[] = html_entity_decode($loc);
+}
+$imgOk = $imgLocs !== [];
+foreach ($imgLocs as $loc) {
+    $path = parse_url($loc, PHP_URL_PATH);
+    if ($path === null || !is_file(PROJECT_ROOT . $path)) { $imgOk = false; }
+}
+ok($imgOk, 'every sitemap image URL maps to an existing file (' . count($imgLocs) . ' images)');
 
 // Explicit cleanup before exit (shutdown function is the backup).
 stop_stub($server, $nullFile);

@@ -90,6 +90,14 @@ define('SOCIAL_LINKS', [
     'email'    => 'mailto:' . EMAIL_ADDRESS,
 ]);
 
+// ─── PERSON ENTITY (schema.org) ──────────────────────────────────────────────
+// One stable identity referenced by every JSON-LD node via @id. sameAs is
+// limited to owner-verified public profiles — contact channels (email,
+// WhatsApp) and unverified accounts are deliberately excluded.
+define('PERSON_ID',      SITE_URL . '/#person');
+define('PERSON_IMAGE',   SITE_URL . '/assets/images/harrison2.webp');
+define('PERSON_SAME_AS', [SOCIAL_LINKS['github'], SOCIAL_LINKS['linkedin']]);
+
 // ─── CV ───────────────────────────────────────────────────────────────────────
 define('CV_PATH', SITE_URL . '/assets/docs/Harrison_Muhoro_Resume.pdf#toolbar=0&navpanes=0');
 

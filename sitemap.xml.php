@@ -36,7 +36,7 @@ $pages = [
         'priority'   => '1.0',
         'images'     => [
             [
-                'loc'     => $baseUrl . '/assets/images/og-image.jpg',
+                'loc'     => $baseUrl . '/assets/images/og-image.webp',
                 'title'   => SITE_NAME . ' — ' . PRIMARY_TITLE,
                 'caption' => SITE_DESCRIPTION,
             ],
@@ -49,7 +49,7 @@ $pages = [
         'priority'   => '0.8',
         'images'     => [
             [
-                'loc'     => $baseUrl . '/assets/images/harrison2.jpg',
+                'loc'     => $baseUrl . '/assets/images/harrison2.webp',
                 'title'   => OWNER_NAME . ' — ' . PRIMARY_TITLE . ', Kenya',
                 'caption' => OWNER_NAME . ' — Software Engineer biography photo',
             ],
@@ -67,8 +67,16 @@ $pages = [
         'changefreq' => 'monthly',
         'priority'   => '0.8',
     ],
+    // Both language variants are independently indexable (self-canonical
+    // + reciprocal hreflang), so each gets its own sitemap entry.
     [
-        'loc'        => $baseUrl . '/it-support',
+        'loc'        => $baseUrl . '/it-support?lang=en',
+        'file'       => PROJECT_ROOT . '/pages/it-support.php',
+        'changefreq' => 'monthly',
+        'priority'   => '0.8',
+    ],
+    [
+        'loc'        => $baseUrl . '/it-support?lang=sw',
         'file'       => PROJECT_ROOT . '/pages/it-support.php',
         'changefreq' => 'monthly',
         'priority'   => '0.8',

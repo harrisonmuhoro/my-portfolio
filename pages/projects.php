@@ -1,5 +1,7 @@
 ﻿<?php
 
+$page_title       = 'Software Development Projects – Harrison Muhoro';
+$page_description = 'Selected software development projects by Harrison Muhoro — web applications, business systems and tools built with PHP, Laravel, React and modern web technologies.';
 $page_css = ['projects'];
 require_once __DIR__ . '/../includes/header.php';
 

@@ -4,6 +4,7 @@
  * Renders <head> section with full SEO, OG, JSON-LD structured data
  */
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/seo.php';
 
 // Page-specific overrides (set before including header)
 $page_title       = $page_title       ?? SITE_NAME . ' — ' . PRIMARY_TITLE;
@@ -22,7 +23,19 @@ if (BASE_PATH !== '' && strpos($clean_uri, BASE_PATH) === 0) {
     $clean_uri = substr($clean_uri, strlen(BASE_PATH)) ?: '/';
 }
 $clean_uri        = $clean_uri === '/' ? '/' : '/' . trim($clean_uri, '/');
-$page_canonical   = $page_canonical   ?? SITE_URL . $clean_uri;
+
+// Language-indexed pages (IT_I18N_ACTIVE) get per-language canonical URLs
+// and reciprocal hreflang annotations so each locale is independently
+// indexable. The active $lang is set by includes/i18n.php before header.
+$hreflang_urls = [];
+if (defined('IT_I18N_ACTIVE') && isset($lang) && in_array($lang, ['en', 'sw'], true)) {
+    $hreflang_urls['en'] = SITE_URL . $clean_uri . '?lang=en';
+    $hreflang_urls['sw'] = SITE_URL . $clean_uri . '?lang=sw';
+    $hreflang_urls['x-default'] = $hreflang_urls['en'];
+    $page_canonical = $hreflang_urls[$lang];
+} else {
+    $page_canonical = $page_canonical ?? SITE_URL . $clean_uri;
+}
 $page_og_image    = $page_og_image    ?? OG_IMAGE;
 
 // Ensure BASE_PATH never has a trailing slash
@@ -42,6 +55,9 @@ $base = rtrim(BASE_PATH, '/');
     <meta name="author"      content="<?= htmlspecialchars(SEO_AUTHOR) ?>">
     <meta name="robots"      content="<?= htmlspecialchars(SEO_ROBOTS) ?>">
     <link rel="canonical"    href="<?= htmlspecialchars($page_canonical) ?>">
+    <?php foreach ($hreflang_urls as $hreflang => $hreflang_href): ?>
+    <link rel="alternate" hreflang="<?= htmlspecialchars($hreflang) ?>" href="<?= htmlspecialchars($hreflang_href) ?>">
+    <?php endforeach; ?>
     <link rel="sitemap"      type="application/xml" title="Sitemap" href="<?= $base ?>/sitemap.xml">
 
     <!-- ── Open Graph ── -->
@@ -90,26 +106,8 @@ $base = rtrim(BASE_PATH, '/');
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <!-- ── JSON-LD Structured Data ── -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": <?= json_encode(OWNER_NAME) ?>,
-        "jobTitle": <?= json_encode(PRIMARY_TITLE) ?>,
-        "description": <?= json_encode(SITE_DESCRIPTION) ?>,
-        "url": <?= json_encode(SITE_URL) ?>,
-        "email": <?= json_encode(EMAIL_ADDRESS) ?>,
-        "telephone": <?= json_encode(PHONE_PRIMARY) ?>,
-        "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Nyeri",
-            "addressCountry": "KE"
-        },
-        "sameAs": <?= json_encode(array_values(SOCIAL_LINKS)) ?>,
-        "knowsAbout": ["HTML5", "CSS3", "JavaScript", "PHP", "MySQL", "MongoDB", "Web Development", "Full-Stack Development"]
-    }
-    </script>
+    <!-- ── JSON-LD Structured Data (centralized Person entity) ── -->
+    <?php seo_jsonld(seo_person_schema()); ?>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>

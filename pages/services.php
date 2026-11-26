@@ -1,5 +1,7 @@
 <?php
 
+$page_title       = 'Web Development Services – Harrison Muhoro';
+$page_description = 'Web development services by Harrison Muhoro in Kenya: custom websites, web applications, system development and ongoing technical support for individuals and businesses.';
 $page_css = ['services'];
 require_once __DIR__ . '/../includes/header.php';
 

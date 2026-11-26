@@ -1,5 +1,7 @@
 <?php
 
+$page_title       = 'About Harrison Muhoro – Software Developer in Kenya';
+$page_description = 'About Harrison Muhoro, a software developer in Nyeri, Kenya — professional background, technical stack, current projects and how to work together.';
 $page_css = ['about'];
 require_once __DIR__ . '/../includes/header.php';
 
@@ -104,5 +106,17 @@ $stack_categories = [
     </section>
 
 </main>
+
+<!-- ProfilePage structured data — mainEntity references the canonical
+     Person entity (@id) defined in includes/seo.php, never a duplicate. -->
+<?php
+seo_jsonld([
+    '@context'   => 'https://schema.org',
+    '@type'      => 'ProfilePage',
+    'url'        => SITE_URL . '/about',
+    'name'       => 'About ' . OWNER_NAME,
+    'mainEntity' => ['@id' => PERSON_ID],
+]);
+?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
