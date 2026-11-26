@@ -839,7 +839,7 @@ ok(count($people) === 1 && ($people[0]['@id'] ?? '') === 'https://www.harrisonmu
     'homepage emits exactly one Person with the stable @id');
 $sameAs = $people[0]['sameAs'] ?? [];
 sort($sameAs);
-ok($sameAs === ['https://github.com/harrisonmuhoro', 'https://www.linkedin.com/in/harrison-muhoro-6476b33a8/'],
+ok($sameAs === ['https://github.com/harrisonmuhoro', 'https://www.linkedin.com/in/harrison-muhoro/'],
     'Person sameAs contains only the approved identity profiles');
 ok(!preg_grep('~mailto:|wa\.me~', $sameAs), 'Person sameAs excludes email and WhatsApp');
 
@@ -893,7 +893,7 @@ ok(str_contains($seoHtml['/'], 'Software Developer &amp; Technology Consultant')
     'homepage presents the approved primary title');
 ok(str_contains($seoHtml['/about'], 'Software Developer &amp; Technology Consultant'),
     'about page presents the approved primary title');
-ok(str_contains($seoHtml['/contact'], 'harrison-muhoro-6476b33a8'),
+ok(str_contains($seoHtml['/contact'], 'linkedin.com/in/harrison-muhoro'),
     'contact page links the confirmed LinkedIn profile');
 $oldUrlFound = false;
 foreach ($seoHtml as $h) {

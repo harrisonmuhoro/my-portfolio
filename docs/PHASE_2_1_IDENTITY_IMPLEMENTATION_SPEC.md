@@ -19,7 +19,7 @@ This document records the owner-approved identity specification that governed th
 | Certifications | freeCodeCamp Responsive Web Design (2023) · freeCodeCamp Back End Development and APIs (2024) · Microsoft AZ-900 **In progress** |
 | Website | https://www.harrisonmuhoro.me/ |
 | GitHub | https://github.com/harrisonmuhoro |
-| LinkedIn | https://www.linkedin.com/in/harrison-muhoro-6476b33a8/ — **supersedes `zion-harrison` everywhere** |
+| LinkedIn | https://www.linkedin.com/in/harrison-muhoro/ — **supersedes `zion-harrison` everywhere** |
 
 **Technology listing rule (owner-confirmed):** all technologies the owner has worked with may be listed, subject to evidence in project repositories and profile content. Actual experience must be distinguished from proficiency and current learning — no technology may be represented as expert-level or currently active without evidence.
 

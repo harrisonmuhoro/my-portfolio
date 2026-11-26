@@ -84,7 +84,7 @@ define('WHATSAPP_LINK',    'https://wa.me/' . WHATSAPP_NUMBER . '?text=' . WHATS
 
 define('SOCIAL_LINKS', [
     'github'   => 'https://github.com/harrisonmuhoro',
-    'linkedin' => 'https://www.linkedin.com/in/harrison-muhoro-6476b33a8/',
+    'linkedin' => 'https://www.linkedin.com/in/harrison-muhoro/',
     'facebook' => 'https://www.facebook.com/harrison.muhoro.1',
     'whatsapp' => WHATSAPP_LINK,
     'email'    => 'mailto:' . EMAIL_ADDRESS,

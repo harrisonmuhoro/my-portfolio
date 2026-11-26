@@ -18,7 +18,7 @@
 | `https://www.harrisonmuhoro.me/` + all page sources in repo (`main` @ `3668ef6`) | ✅ inspected (code + Phase 1 live verification) |
 | `https://github.com/harrisonmuhoro` (public profile) | ✅ fetched — bio field is emoji-only ("💭👨‍💻👨‍💻⌨️"), location "Nyeri,Kenya", link `harrisonmuhoro.me`, 2 followers |
 | `https://github.com/harrisonmuhoro/harrisonmuhoro` (profile README repo) | ✅ fetched — full README captured; repo metadata: **no description, no website, no topics** |
-| LinkedIn profile | ✅ **reviewed via owner-provided screenshot, 26 November 2026** — **[CORRECTED]** (original audit recorded HTTP 999 inaccessibility for the wrong URL `zion-harrison`). Screenshot evidence: name Harrison Muhoro; headline "Web Developer \| HTML, CSS, JavaScript, PHP \| Builds clean, responsive website."; location Nyeri, Kenya; "Open to Work" indicator visible; custom URL slug `harrison-muhoro-6476b33a8`. **The screenshot does not expose the About, Experience, Featured, Skills or full contact sections — those were NOT audited and must not be assumed.** |
+| LinkedIn profile | ✅ **reviewed via owner-provided screenshot, 26 November 2026** — **[CORRECTED]** (original audit recorded HTTP 999 inaccessibility for the wrong URL `zion-harrison`). Screenshot evidence: name Harrison Muhoro; headline "Web Developer \| HTML, CSS, JavaScript, PHP \| Builds clean, responsive website."; location Nyeri, Kenya; "Open to Work" indicator visible; custom URL slug `harrison-muhoro`. **The screenshot does not expose the About, Experience, Featured, Skills or full contact sections — those were NOT audited and must not be assumed.** |
 
 ## 3. Current identity inventory
 
@@ -43,7 +43,7 @@
 **LinkedIn** — *per owner screenshot, 26 November 2026* **[CORRECTED]**:
 - Name: Harrison Muhoro · Location: Nyeri, Kenya · "Open to Work" visible
 - Headline: "Web Developer | HTML, CSS, JavaScript, PHP | Builds clean, responsive website." — does **not** reflect the approved title or three pillars
-- Custom URL: `harrison-muhoro-6476b33a8` — **supersedes `zion-harrison` everywhere**
+- Custom URL: `harrison-muhoro` — **supersedes `zion-harrison` everywhere**
 - About / Experience / Featured / Skills / full contact details: **not visible in screenshot — not audited**
 
 ## 4. Cross-platform consistency matrix
@@ -92,7 +92,7 @@
 ## 7. Recommended corrections (prioritized)
 
 1. ~~**Owner decision:** canonical primary title~~ — **DONE:** "Software Developer & Technology Consultant" approved and implemented.
-2. ~~**Add LinkedIn URL to GitHub README**~~ — **DONE:** badge + link added (`eb00a79`); correct URL `harrison-muhoro-6476b33a8`.
+2. ~~**Add LinkedIn URL to GitHub README**~~ — **DONE:** badge + link added (`eb00a79`); correct URL `harrison-muhoro`.
 3. **Fill GitHub profile README repo metadata** — description, website (`https://www.harrisonmuhoro.me`), topics. *Owner-managed — pending.*
 4. **Improve GitHub profile bio field** — replace emoji-only bio with a one-line professional summary. *Owner-managed — pending.*
 5. ~~**Clarify "2 years" scope**~~ — **DONE:** combined-experience wording implemented (EN + SW) per owner confirmation.

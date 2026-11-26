@@ -10,7 +10,7 @@
 
 | File | Change |
 |------|--------|
-| `config/config.php` | `PRIMARY_TITLE` → `Software Developer & Technology Consultant`; `SECONDARY_TITLE` → three expertise areas; `SITE_DESCRIPTION` + `SEO_KEYWORDS` title-aligned; `SOCIAL_LINKS['linkedin']` → `https://www.linkedin.com/in/harrison-muhoro-6476b33a8/` |
+| `config/config.php` | `PRIMARY_TITLE` → `Software Developer & Technology Consultant`; `SECONDARY_TITLE` → three expertise areas; `SITE_DESCRIPTION` + `SEO_KEYWORDS` title-aligned; `SOCIAL_LINKS['linkedin']` → `https://www.linkedin.com/in/harrison-muhoro/` |
 | `config/config.example.php` | Same LinkedIn URL + title constants (template parity) |
 | `pages/home-redesign.php` | page_title, hero eyebrow, subheadline, image alt → approved positioning |
 | `pages/about.php` | title, bio line, image alt → approved positioning; `about-page__title` now renders `PRIMARY_TITLE` |
@@ -20,7 +20,7 @@
 | `tests/run_tests.php` | LinkedIn `sameAs` expectation updated to confirmed URL; ~11 new assertions: `jobTitle` consistency, no stale `zion-harrison` URL on any public page, combined-experience EN/SW checks, AZ-900 "In progress", contact-page LinkedIn destination |
 | `docs/PHASE_2_1_PERSONAL_ENTITY_BASELINE_AUDIT.md` | Corrected per owner evidence (LinkedIn screenshot, confirmed URL, owner decisions) |
 
-**LinkedIn URL note:** during implementation the config initially carried `…/in/harrison-muhoro/` (slug truncated). Caught on diff review and corrected to the owner-confirmed `…/in/harrison-muhoro-6476b33a8/` in `config.php`, `config.example.php` and the test expectation before commit. Contact/homepage links resolve through `SOCIAL_LINKS` — single source, no hardcoded duplicates.
+**LinkedIn URL note:** during implementation the config initially carried `…/in/harrison-muhoro/` (slug truncated). Caught on diff review and corrected to the owner-confirmed `…/in/harrison-muhoro/` in `config.php`, `config.example.php` and the test expectation before commit. Contact/homepage links resolve through `SOCIAL_LINKS` — single source, no hardcoded duplicates.
 
 ### GitHub profile README (`harrisonmuhoro/harrisonmuhoro`)
 
