@@ -49,7 +49,7 @@ New/updated coverage:
 
 ## 5. Unresolved production-only checks
 
-- **F4/F3-edge:** apex→www **307** is issued by the hosting edge before PHP — requires Wasmer Edge/host redirect rule changed to 301/308. App code already sends 301. Verify post-deploy: `curl -sI https://harrisonmuhoro.me/ | head -1`.
+- **F4/F3-edge:** apex→www redirect — *superseded:* owner-verified HTTP **308** with path/query preservation on 26 Nov 2026 (see `SEO_PHASE_1D_VERIFICATION.md` §4). Was edge-issued 307 at verification time.
 - **F7:** certification claims preserved verbatim; owner verification pending.
 - Post-deploy cookie check: `curl -sI https://www.harrisonmuhoro.me/contact | grep -i "set-cookie"` — expect `PHPSESSID` with `Secure; HttpOnly; SameSite=Lax` and **no `Domain=` attribute**; homepage should show no `Set-Cookie` at all.
 - Live `/robots.txt` should now be the dynamic output including `Disallow: /storage/`.

@@ -30,6 +30,6 @@ All prior coverage preserved: i18n dictionary, rate limiter + failure policy, ma
 
 ## 4. Remaining production-only tasks
 
-- Apex→www **307** redirect — hosting-edge config (Wasmer Edge), not fixable in PHP. Verified still 307 live.
+- ~~Apex→www redirect~~ — **RESOLVED.** Owner-provided live PowerShell verification (26 November 2026) confirms the hosting layer now returns **HTTP 308 Permanent Redirect**: `https://harrisonmuhoro.me/` → `https://www.harrisonmuhoro.me/` (308), `https://www.harrisonmuhoro.me/` → 200, with paths (`/about`, `/services`) and query strings (`/contact?source=test`) preserved. Earlier Phase 1C observation of a 307 was point-in-time and is superseded.
 - Certification claims — owner verification pending (unchanged by design).
 - Search Console resubmission/monitoring post-deploy.

@@ -71,7 +71,7 @@ JSON-LD validity: paste page source blocks into https://validator.schema.org/ or
 
 ## 6. Outstanding risks / owner actions
 
-- **F3** apex→www 307 is edge-issued — hosting config required, unchanged. App code already sends 301.
+- **F3** apex→www redirect — *superseded:* owner-verified HTTP **308** on 26 Nov 2026 (see `SEO_PHASE_1D_VERIFICATION.md` §4). Was edge-issued 307 at the time of this audit; app code sends 301.
 - **F7** certification claims preserved verbatim per owner decision; external verification pending.
 - **LinkedIn headline** should be checked by the owner to confirm it supports "Software Engineer" positioning (`linkedin.com/in/zion-harrison`).
 - Production deployment/crawl state cannot be confirmed from the repository — verify per §5 and Search Console.
