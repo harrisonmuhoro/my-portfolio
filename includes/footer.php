@@ -17,7 +17,7 @@ $tr = function (string $key, string $en): string {
         <div class="footer__top">
             <div class="footer__brand">
                 <a href="<?= BASE_PATH ?>/" class="footer__logo"><?= OWNER_NAME ?></a>
-                <p class="footer__tagline"><?= htmlspecialchars($tr('footer_tagline', 'Software engineer building dependable systems in Nyeri, Kenya.')) ?></p>
+                <p class="footer__tagline"><?= htmlspecialchars($tr('footer_tagline', 'Software developer and technology consultant building dependable systems in Nyeri, Kenya.')) ?></p>
             </div>
 
             <nav class="footer__nav" aria-label="Footer Navigation">

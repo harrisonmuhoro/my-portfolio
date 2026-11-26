@@ -19,7 +19,7 @@ unset($_doc_root, $_proj_root, $_base_path);
 
 define('SITE_NAME', 'Harrison Muhoro');
 define('SITE_TAGLINE', 'Building Systems That Work. Delivering Solutions That Scale.');
-define('SITE_DESCRIPTION', 'Harrison Muhoro is a software engineer in Kenya who builds production-ready enterprise systems—backend architecture, performant web applications, and maintainable software for healthcare, operations, and business teams.');
+define('SITE_DESCRIPTION', 'Harrison Muhoro is a software developer and technology consultant in Kenya offering full-stack development, IT support & networking, and enterprise software development.');
 define('SITE_URL', getenv('SITE_URL') ?: 'https://www.harrisonmuhoro.me');
 define('SITE_VERSION', '1.0.0');
 define('SITE_LANGUAGE', 'en-KE');
@@ -27,8 +27,8 @@ define('SITE_LOCALE', 'en_KE');
 
 define('OWNER_NAME', 'Harrison Muhoro');
 define('OWNER_FIRST_NAME', 'Harrison');
-define('PRIMARY_TITLE', 'Software Engineer');
-define('SECONDARY_TITLE', 'Enterprise Systems & Full-Stack Engineer');
+define('PRIMARY_TITLE', 'Software Developer & Technology Consultant');
+define('SECONDARY_TITLE', 'Full-Stack Development · IT Support & Networking · Enterprise Software Development');
 define('LOCATION', 'Nyeri, Kenya');
 
 define('EMAIL_ADDRESS', 'your@email.com');
@@ -40,7 +40,7 @@ define('WHATSAPP_LINK', 'https://wa.me/' . WHATSAPP_NUMBER . '?text=' . WHATSAPP
 
 define('SOCIAL_LINKS', [
     'github'   => 'https://github.com/harrisonmuhoro',
-    'linkedin' => 'https://linkedin.com/in/zion-harrison',
+    'linkedin' => 'https://www.linkedin.com/in/harrison-muhoro-6476b33a8/',
     'facebook' => 'https://www.facebook.com/harrison.muhoro.1',
     'whatsapp' => WHATSAPP_LINK,
     'email'    => 'mailto:' . EMAIL_ADDRESS,

@@ -1,6 +1,6 @@
 <?php
-$page_title       = 'Harrison Muhoro – Software Engineer & Web Developer in Kenya';
-$page_description = 'Harrison Muhoro is a software engineer and web developer based in Nyeri, Kenya. Explore selected projects, technical skills, certifications and IT support services.';
+$page_title       = 'Harrison Muhoro – Software Developer & Technology Consultant in Kenya';
+$page_description = 'Harrison Muhoro is a software developer and technology consultant based in Nyeri, Kenya, working across full-stack development, IT support & networking, and enterprise software development. Explore projects, technical skills, certifications and IT support services.';
 $page_css = ['home'];
 require_once __DIR__ . '/../includes/header.php';
 
@@ -60,11 +60,11 @@ $certifications = [
     <section class="hero-section" id="hero">
         <div class="container hero-container">
             <div class="hero__copy reveal-stagger">
-                <p class="hero__eyebrow reveal">Software engineer · Nyeri, Kenya</p>
+                <p class="hero__eyebrow reveal">Software Developer &amp; Technology Consultant · Nyeri, Kenya</p>
                 <h1 class="hero__headline reveal">Digital solutions built for the way your business works.</h1>
                 <p class="hero__sentence reveal">I build reliable digital systems that make everyday work simpler, faster, and easier to manage.</p>
                 <p class="hero__sentence reveal">From hospitals and hotels to schools and businesses, I create software that helps teams manage their operations, reduce paperwork, organize information, and serve their customers better. I focus on building solutions that work reliably in the real world—not just impressive demos.</p>
-                <p class="hero__subheadline reveal">I take complex business processes and turn them into clear, practical digital experiences. Whether you need a new system, want to improve an existing one, or have a process that is still running on paper, I build software around the way your organization actually works.</p>
+                <p class="hero__subheadline reveal">Across full-stack development, IT support &amp; networking, and enterprise software development, I take complex business processes and turn them into clear, practical digital experiences. Whether you need a new system, want to improve an existing one, or have a process that is still running on paper, I build software around the way your organization actually works.</p>
                 <div class="hero__actions reveal">
                     <a href="#contact" class="btn btn--primary">Write to me</a>
                     <a href="<?= BASE_PATH ?>/projects" class="btn btn--outline">See the work</a>
@@ -73,7 +73,7 @@ $certifications = [
 
             
             <figure class="hero__photo reveal reveal--image">
-                <img src="<?= BASE_PATH ?>/assets/images/harrison2.webp" alt="<?= OWNER_NAME ?>, software engineer in Kenya" width="520" height="640" loading="eager" fetchpriority="high">
+                <img src="<?= BASE_PATH ?>/assets/images/harrison2.webp" alt="<?= OWNER_NAME ?>, software developer and technology consultant in Kenya" width="520" height="640" loading="eager" fetchpriority="high">
                 <figcaption><?= OWNER_NAME ?>, photographed in Kenya</figcaption>
             </figure>
         </div>

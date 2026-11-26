@@ -839,7 +839,7 @@ ok(count($people) === 1 && ($people[0]['@id'] ?? '') === 'https://www.harrisonmu
     'homepage emits exactly one Person with the stable @id');
 $sameAs = $people[0]['sameAs'] ?? [];
 sort($sameAs);
-ok($sameAs === ['https://github.com/harrisonmuhoro', 'https://linkedin.com/in/zion-harrison'],
+ok($sameAs === ['https://github.com/harrisonmuhoro', 'https://www.linkedin.com/in/harrison-muhoro-6476b33a8/'],
     'Person sameAs contains only the approved identity profiles');
 ok(!preg_grep('~mailto:|wa\.me~', $sameAs), 'Person sameAs excludes email and WhatsApp');
 
@@ -883,6 +883,31 @@ ok($personIds !== [] && count(array_unique($personIds)) === 1
     'Person @id is identical on every page that emits it');
 ok(count(array_unique($personNames)) === 1 && reset($personNames) === 'Harrison Muhoro',
     'Person name is consistent on every page');
+
+// Phase 2.1 identity: approved primary title, confirmed LinkedIn URL,
+// combined-experience wording, and AZ-900 still marked in progress.
+$canonicalTitle = 'Software Developer & Technology Consultant';
+ok(($people[0]['jobTitle'] ?? '') === $canonicalTitle,
+    'Person jobTitle is the approved primary title');
+ok(str_contains($seoHtml['/'], 'Software Developer &amp; Technology Consultant'),
+    'homepage presents the approved primary title');
+ok(str_contains($seoHtml['/about'], 'Software Developer &amp; Technology Consultant'),
+    'about page presents the approved primary title');
+ok(str_contains($seoHtml['/contact'], 'harrison-muhoro-6476b33a8'),
+    'contact page links the confirmed LinkedIn profile');
+$oldUrlFound = false;
+foreach ($seoHtml as $h) {
+    if (str_contains($h, 'zion-harrison')) { $oldUrlFound = true; }
+}
+ok(!$oldUrlFound, 'no public page publishes the outdated LinkedIn URL');
+ok(str_contains($seoHtml['/it-support?lang=en'], 'Two years of combined hands-on experience')
+    && str_contains($seoHtml['/it-support?lang=en'], '2 years combined experience'),
+    'English IT Support states combined (not per-area) experience');
+ok(stripos($seoHtml['/it-support?lang=sw'], 'miaka miwili ya pamoja') !== false,
+    'Kiswahili IT Support conveys the same combined-experience meaning');
+ok(str_contains($seoHtml['/'], 'Microsoft Azure Fundamentals')
+    && str_contains($seoHtml['/'], 'In progress'),
+    'AZ-900 remains labelled In progress on the homepage');
 
 // Every emitted JSON-LD block must be valid JSON (XSS/encoding safety).
 $badJson = 0;

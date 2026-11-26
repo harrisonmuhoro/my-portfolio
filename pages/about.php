@@ -1,7 +1,7 @@
 <?php
 
-$page_title       = 'About Harrison Muhoro – Software Developer in Kenya';
-$page_description = 'About Harrison Muhoro, a software developer in Nyeri, Kenya — professional background, technical stack, current projects and how to work together.';
+$page_title       = 'About Harrison Muhoro – Software Developer & Technology Consultant in Kenya';
+$page_description = 'About Harrison Muhoro, a software developer and technology consultant in Nyeri, Kenya — professional background, technical stack, current projects and how to work together.';
 $page_css = ['about'];
 require_once __DIR__ . '/../includes/header.php';
 
@@ -24,10 +24,10 @@ $stack_categories = [
                 <div class="about-page__bio reveal-stagger">
                     <span class="section-heading__label">About</span>
                     <h1 class="about-page__name reveal"><?= OWNER_NAME ?></h1>
-                    <p class="about-page__title"><?= PRIMARY_TITLE ?>, Nyeri</p>
+                    <p class="about-page__title"><?= htmlspecialchars(PRIMARY_TITLE) ?>, Nyeri</p>
 
                     <p class="about-page__para reveal">
-                        I'm Harrison, a software developer from Kenya focused on creating practical digital solutions for businesses and organizations.
+                        I'm Harrison, a software developer and technology consultant from Kenya focused on creating practical digital solutions for businesses and organizations — across full-stack development, IT support &amp; networking, and enterprise software development.
                     </p>
                     <p class="about-page__para reveal">
                         I build systems that help teams replace repetitive manual work, organize information, manage daily operations, and deliver better services to the people they serve.
@@ -51,7 +51,7 @@ $stack_categories = [
                 <figure class="about-page__photo reveal reveal--image">
                     <img
                         src="<?= BASE_PATH ?>/assets/images/harrison2.webp"
-                        alt="<?= OWNER_NAME ?> — software engineer, Kenya"
+                        alt="<?= OWNER_NAME ?> — software developer and technology consultant, Kenya"
                         class="about-page__img"
                         width="480"
                         height="600"

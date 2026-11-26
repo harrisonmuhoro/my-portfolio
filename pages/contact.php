@@ -1,6 +1,6 @@
 <?php
-$page_title       = 'Contact Harrison Muhoro – Software Developer in Kenya';
-$page_description = 'Get in touch with Harrison Muhoro, a software developer in Nyeri, Kenya. Email, WhatsApp, phone and social channels for project enquiries.';
+$page_title       = 'Contact Harrison Muhoro – Software Developer & Technology Consultant in Kenya';
+$page_description = 'Get in touch with Harrison Muhoro, a software developer and technology consultant in Nyeri, Kenya. Email, WhatsApp, phone and social channels for project enquiries.';
 $page_css = ['contact'];
 require_once __DIR__ . '/../includes/header.php';
 
@@ -58,7 +58,7 @@ $csrf_token = $_SESSION[CSRF_TOKEN_NAME];
                             </div>
                             <div class="contact-channel__body">
                                 <div class="contact-channel__label">LinkedIn</div>
-                                <div class="contact-channel__value">linkedin.com/in/zion-harrison</div>
+                                <div class="contact-channel__value">linkedin.com/in/harrison-muhoro-6476b33a8</div>
                             </div>
                             <svg class="contact-channel__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>

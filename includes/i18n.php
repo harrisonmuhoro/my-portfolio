@@ -60,10 +60,10 @@ function it_dictionary(): array {
                 // ── Hero ──
                 'hero_label'       => 'IT Support & Networking',
                 'hero_title'       => 'IT support that comes to you.',
-                'hero_sub'         => 'Fast, honest help with computers, networks, and business IT — on-site around Nyeri or remotely where there is an internet connection. Two years of hands-on experience, priced by quotation.',
+                'hero_sub'         => 'Fast, honest help with computers, networks, and business IT — on-site around Nyeri or remotely where there is an internet connection. Two years of combined hands-on experience across software development and IT support, priced by quotation.',
                 'badge_area'       => 'Nyeri & surrounding areas',
                 'badge_methods'    => 'On-site & remote support',
-                'badge_exp'        => '2 years experience',
+                'badge_exp'        => '2 years combined experience',
                 'badge_quote'      => 'Quotation-based pricing',
                 'badge_lang'       => 'English & Kiswahili',
                 'cta_quote'        => 'Request a quotation',
@@ -160,7 +160,7 @@ function it_dictionary(): array {
                 'nav_services'     => 'Services',
                 'nav_contact'      => 'Contact',
                 'nav_cv'           => 'CV',
-                'footer_tagline'   => 'Software engineer building dependable systems in Nyeri, Kenya.',
+                'footer_tagline'   => 'Software developer and technology consultant building dependable systems in Nyeri, Kenya.',
                 'footer_location'  => 'Nyeri, Kenya',
             ],
 
@@ -171,10 +171,10 @@ function it_dictionary(): array {
 
                 'hero_label'       => 'Msaada wa IT na Mtandao',
                 'hero_title'       => 'Msaada wa IT unaokuja kwako.',
-                'hero_sub'         => 'Msaada wa haraka na wa kuaminika kwa kompyuta, mitandao na IT ya biashara — kwenye eneo la Nyeri na mabonde au mbali popote penye muunganisho wa intaneti. Uzoefu wa miaka miwili, bei kwa nukuu.',
+                'hero_sub'         => 'Msaada wa haraka na wa kuaminika kwa kompyuta, mitandao na IT ya biashara — kwenye eneo la Nyeri na mabonde au mbali popote penye muunganisho wa intaneti. Miaka miwili ya pamoja ya uzoefu wa vitendo katika uhandisi wa programu na msaada wa IT, bei kwa nukuu.',
                 'badge_area'       => 'Nyeri na maeneo ya karibu',
                 'badge_methods'    => 'Huduma ya eneo na mbali',
-                'badge_exp'        => 'Uzoefu wa miaka miwili',
+                'badge_exp'        => 'Miaka miwili ya pamoja ya uzoefu',
                 'badge_quote'      => 'Bei kwa nukuu',
                 'badge_lang'       => 'Kiingereza na Kiswahili',
                 'cta_quote'        => 'Omba nukuu ya bei',
@@ -266,7 +266,7 @@ function it_dictionary(): array {
                 'nav_services'     => 'Huduma za Programu',
                 'nav_contact'      => 'Mawasiliano',
                 'nav_cv'           => 'CV',
-                'footer_tagline'   => 'Mhandisi wa programu anayejenga mifumo thabiti Nyeri, Kenya.',
+                'footer_tagline'   => 'Mhandisi wa programu na mshauri wa teknolojia anayejenga mifumo thabiti Nyeri, Kenya.',
                 'footer_location'  => 'Nyeri, Kenya',
             ],
         ];
