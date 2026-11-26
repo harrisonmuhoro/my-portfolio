@@ -939,6 +939,39 @@ foreach ($sitemapImgs as $loc) {
 }
 ok($imgOk, 'every sitemap <image:loc> maps to an existing file (' . count($sitemapImgs) . ' images)');
 
+// ── Sessions: lazy start — public routes must not open a PHP session ──
+echo "== sessions ==\n";
+
+$routerProbe = function (string $uri): string {
+    return page_probe(['router' => true, 'uri' => $uri, 'host' => 'www.harrisonmuhoro.me']);
+};
+$sessionState = function (string $html): ?int {
+    return preg_match('/<!--probe:session_status=(\d+)-->/', $html, $m) ? (int) $m[1] : null;
+};
+foreach (['/', '/about', '/services', '/projects', '/sitemap.xml', '/robots.txt', '/nonexistent-404'] as $u) {
+    ok($sessionState($routerProbe($u)) === PHP_SESSION_NONE,
+        "no PHP session started for public route $u");
+}
+foreach (['/contact', '/it-support'] as $u) {
+    ok($sessionState($routerProbe($u)) === PHP_SESSION_ACTIVE,
+        "session started for stateful route $u");
+}
+// Language persistence still works end-to-end through the router:
+// ?lang=sw renders Kiswahili even though the session starts fresh.
+$routerSw = $routerProbe('/it-support?lang=sw');
+ok(($seoHtmlLang($routerSw) ?? '') === 'sw-KE'
+    && str_contains($routerSw, '<title>Huduma za Msaada'),
+    'router: ?lang=sw renders Kiswahili through index.php');
+
+// ── robots.txt: single dynamic source, canonical sitemap URL ──
+echo "== robots.txt ==\n";
+$robots = page_probe(['page' => 'robots.txt.php', 'uri' => '/robots.txt', 'host' => 'www.harrisonmuhoro.me']);
+ok(str_contains($robots, 'User-agent: *'), 'robots.txt allows all user agents');
+ok(str_contains($robots, 'Sitemap: https://www.harrisonmuhoro.me/sitemap.xml'),
+    'robots.txt references the canonical sitemap URL');
+ok(str_contains($robots, 'Disallow: /backend/'), 'robots.txt disallows backend paths');
+ok(!is_file(PROJECT_ROOT . '/robots.txt'), 'no static robots.txt shadowing the dynamic route');
+
 // Explicit cleanup before exit (shutdown function is the backup).
 stop_stub($server, $nullFile);
 

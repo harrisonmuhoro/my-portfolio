@@ -164,4 +164,27 @@ if (DEBUG_MODE) {
 // ─── TIMEZONE ─────────────────────────────────────────────────────────────────
 date_default_timezone_set('Africa/Nairobi');
 
+// ─── SESSION ──────────────────────────────────────────────────────────────────
+// Sessions are started lazily — only by routes/handlers that need them
+// (CSRF tokens, language preference) — so public pages emit no PHPSESSID
+// cookie and stay edge-cacheable. Always go through this helper so the
+// hardened cookie parameters are applied consistently.
+if (!function_exists('app_session_start')) {
+    function app_session_start(): void {
+        if (session_status() !== PHP_SESSION_NONE) {
+            return;
+        }
+        $is_secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+        session_set_cookie_params([
+            'lifetime' => 0,              // Session cookie (expires on browser close)
+            'path'     => '/',
+            'domain'   => $_SERVER['HTTP_HOST'] ?? '',
+            'secure'   => $is_secure,      // Only send over HTTPS in production
+            'httponly'  => true,           // Prevent JavaScript access
+            'samesite'  => 'Lax',          // CSRF protection
+        ]);
+        session_start();
+    }
+}
+
 unset($_is_local);

@@ -71,9 +71,12 @@ JSON-LD validity: paste page source blocks into https://validator.schema.org/ or
 
 ## 6. Outstanding risks / owner actions
 
-- **F3** apex→www 307 is edge-issued — hosting config required, unchanged.
-- **F6** unconditional `session_start()` — lazy sessions remain a later phase.
+- **F3** apex→www 307 is edge-issued — hosting config required, unchanged. App code already sends 301.
 - **F7** certification claims preserved verbatim per owner decision; external verification pending.
-- **F9** two robots.txt sources — unchanged.
 - **LinkedIn headline** should be checked by the owner to confirm it supports "Software Engineer" positioning (`linkedin.com/in/zion-harrison`).
 - Production deployment/crawl state cannot be confirmed from the repository — verify per §5 and Search Console.
+
+### Follow-up (post-1B): F6 + F9 resolved
+
+- **F6 lazy sessions:** `index.php` now starts a session only for `/contact` and `/it-support` (the routes that need CSRF/language state). All session starts go through `app_session_start()` in `config.php`, which applies the hardened cookie params (HttpOnly, SameSite=Lax, Secure-on-HTTPS) — this also fixes a latent gap where `backend/*.php` handlers and `i18n.php` previously called plain `session_start()` with default cookie params. Router-mode probes assert `session_status() === PHP_SESSION_NONE` on `/`, `/about`, `/services`, `/projects`, `/sitemap.xml`, `/robots.txt` and 404s. **Production check after deploy:** `curl -sI https://www.harrisonmuhoro.me/ | grep -i "set-cookie"` should return nothing.
+- **F9 robots.txt:** the static `robots.txt` was deleted; `/robots.txt` now routes to `robots.txt.php` (same mechanism as `/sitemap.xml`, already proven in production). Single source of truth, `SITE_URL`-aware sitemap reference. Tests assert content and that no static file shadows the route.

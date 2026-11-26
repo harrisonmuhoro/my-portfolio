@@ -10,6 +10,7 @@
 if (!defined('PROJECT_ROOT')) {
     define('PROJECT_ROOT', dirname(__DIR__));
 }
+require_once PROJECT_ROOT . '/config/config.php';
 
 /** Supported languages: code => native label */
 const IT_LANGUAGES = [
@@ -23,9 +24,7 @@ const IT_LANGUAGES = [
  * session-stored preference, then English.
  */
 function it_lang(): string {
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
+    app_session_start();
 
     if (isset($_GET['lang'])) {
         $candidate = strtolower(trim((string) $_GET['lang']));

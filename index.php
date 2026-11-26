@@ -22,20 +22,6 @@ if (in_array($requestHost, $canonicalHosts, true)
 // ── Send security headers (MUST be before any output) ──────
 require_once PROJECT_ROOT . '/config/security_headers.php';
 
-// ── Secure session configuration ───────────────────────────
-if (session_status() === PHP_SESSION_NONE) {
-    $is_secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-    session_set_cookie_params([
-        'lifetime' => 0,              // Session cookie (expires on browser close)
-        'path'     => '/',
-        'domain'   => $_SERVER['HTTP_HOST'] ?? '',
-        'secure'   => $is_secure,      // Only send over HTTPS in production
-        'httponly'  => true,           // Prevent JavaScript access
-        'samesite'  => 'Lax',          // CSRF protection
-    ]);
-    session_start();
-}
-
 // ── Simple Router ──────────────────────────────────────────
 $request_uri = $_SERVER['REQUEST_URI'];
 // Remove query string
@@ -49,6 +35,15 @@ if (BASE_PATH !== '' && strpos($path, BASE_PATH) === 0) {
 // Default to '/' if empty after stripping base path
 if (empty($path)) {
     $path = '/';
+}
+
+// ── Lazy session start ─────────────────────────────────────
+// Only routes that need server-side state (CSRF tokens, language
+// preference) start a session. Public pages emit no PHPSESSID cookie
+// and remain cacheable. Handlers start their own sessions.
+$session_routes = ['/contact', '/it-support'];
+if (in_array($path, $session_routes, true)) {
+    app_session_start();
 }
 
 // Map paths to page files

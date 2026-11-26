@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // ── Start session for CSRF ───────────────────────────────────
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+app_session_start();
 
 // ── CSRF Validation ──────────────────────────────────────────
 $submitted_token = trim($_POST[CSRF_TOKEN_NAME] ?? '');
