@@ -575,29 +575,55 @@ foreach ((array) glob($preDir . DIRECTORY_SEPARATOR . '*.json') as $file) { @unl
 @rmdir($preDir);
 @rmdir($preWeb);
 
-// Symlink that resolves INTO the public root must be rejected — the
-// post-creation realpath check is what catches it.
-$lnkWeb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_lnkw_' . bin2hex(random_bytes(6));
-$lnkTarget = $lnkWeb . DIRECTORY_SEPARATOR . 'real_store';
-$lnkLink = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_lnk_' . bin2hex(random_bytes(6));
-mkdir($lnkWeb);
-mkdir($lnkTarget);
-if (@symlink($lnkTarget, $lnkLink)) {
-    $lnkSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
-        'APP_ENV' => 'production',
-        'RATE_LIMIT_DIR' => $lnkLink,
-    ]);
-    $lnkSpec['host'] = 'portfolio.example';
-    $lnkSpec['document_root'] = $lnkWeb;
-    $r = probe($lnkSpec);
-    ok($r['http'] === 429, 'production rejects a symlink resolving inside the public root');
-    @unlink($lnkLink);
+// Symlink fixtures cover dangling and existing targets. A symlink-specific
+// skip is reported only when this runtime cannot create a link at all.
+$symWeb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_symw_' . bin2hex(random_bytes(6));
+$symOutside = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_symo_' . bin2hex(random_bytes(6));
+$symBase = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_sym_' . bin2hex(random_bytes(6));
+mkdir($symWeb);
+mkdir($symOutside);
+$symProbe = $symBase . '_probe';
+if (@symlink($symOutside, $symProbe)) {
+    @unlink($symProbe);
+    $cases = [
+        ['dangling link into public root', $symBase . '_in', $symWeb . DIRECTORY_SEPARATOR . 'not_created', true],
+        ['dangling link outside public root', $symBase . '_out', $symOutside . DIRECTORY_SEPARATOR . 'not_created', false],
+        ['link to existing external directory', $symBase . '_external', $symOutside, false],
+        ['link to existing directory inside public root', $symBase . '_inside', $symWeb, true],
+    ];
+    foreach ($cases as [$label, $link, $target, $reject]) {
+        if (!@symlink($target, $link)) {
+            echo "  SKIP  $label (symlink creation unavailable)\n";
+            continue;
+        }
+        $spec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+            'APP_ENV' => 'production', 'RATE_LIMIT_DIR' => $link . DIRECTORY_SEPARATOR . 'rate_limits',
+        ]);
+        $spec['host'] = 'portfolio.example';
+        $spec['document_root'] = $symWeb;
+        $r = probe($spec);
+        ok($r['http'] === ($reject ? 429 : 503), 'production ' . ($reject ? 'rejects' : 'accepts') . ' ' . $label);
+        if ($reject && str_contains($label, 'dangling link into')) {
+            ok(!file_exists($symWeb . DIRECTORY_SEPARATOR . 'not_created'), 'dangling in-root target is not created before rejection');
+        }
+        @unlink($link);
+    }
 } else {
-    echo "  SKIP  symlink test (symlink() unavailable on this platform)\n";
+    echo "  SKIP  symlink regression cases (symlink() unavailable on this platform)\n";
 }
-foreach ((array) glob($lnkTarget . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
-@rmdir($lnkTarget);
-@rmdir($lnkWeb);
+$ordinaryOutside = $symOutside . DIRECTORY_SEPARATOR . 'new' . DIRECTORY_SEPARATOR . 'rate_limits';
+$ordinarySpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production', 'RATE_LIMIT_DIR' => $ordinaryOutside,
+]);
+$ordinarySpec['host'] = 'portfolio.example';
+$ordinarySpec['document_root'] = $symWeb;
+$r = probe($ordinarySpec);
+ok($r['http'] === 503, 'production accepts nonexistent ordinary storage outside the public root');
+foreach ((array) glob($ordinaryOutside . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+@rmdir($ordinaryOutside);
+@rmdir(dirname($ordinaryOutside));
+@rmdir($symOutside);
+@rmdir($symWeb);
 
 $localFallback = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv);
 $r = probe($localFallback);

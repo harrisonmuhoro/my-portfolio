@@ -154,25 +154,59 @@ function rl_normalize_path(string $path): string {
  */
 function rl_prevalidate_prod_dir(string $dir, string $publicRoot): bool {
     $norm = rl_normalize_path($dir);
-
-    // Nearest existing ancestor — its canonical path decides whether the
-    // final directory would land inside the public root.
-    $ancestor = $norm;
-    while (!file_exists($ancestor)) {
-        $parent = dirname($ancestor);
-        if ($parent === $ancestor) { break; }
-        $ancestor = $parent;
-    }
-    $ancestorReal = realpath($ancestor);
-    if ($ancestorReal === false) {
-        error_log('[RateLimiter] cannot resolve ancestor of RATE_LIMIT_DIR');
+    $resolved = rl_resolve_path_symlinks($norm);
+    if ($resolved === null) {
+        error_log('[RateLimiter] cannot safely resolve RATE_LIMIT_DIR ancestors');
         return false;
     }
-    if (rl_path_is_within($ancestorReal, $publicRoot)) {
+    if (rl_path_is_within($resolved, $publicRoot)) {
         error_log('[RateLimiter] RATE_LIMIT_DIR resolves inside the public web root');
         return false;
     }
     return true;
+}
+
+/**
+ * Resolve every existing symlink component, including dangling links, while
+ * retaining a normalized lexical path for the not-yet-created suffix. A null
+ * result means a link could not be read, a loop was encountered, or the
+ * nearest existing non-link ancestor could not be canonicalized.
+ */
+function rl_resolve_path_symlinks(string $path): ?string {
+    $path = rl_normalize_path($path);
+    for ($links = 0; $links < 40; $links++) {
+        $parts = preg_split('~[\\\\/]~', $path, -1, PREG_SPLIT_NO_EMPTY);
+        $prefix = preg_match('~^[A-Za-z]:[\\\\/]~', $path, $m) ? substr($m[0], 0, 2) . DIRECTORY_SEPARATOR : DIRECTORY_SEPARATOR;
+        $current = $prefix;
+        $restarted = false;
+        foreach ($parts as $i => $part) {
+            $current = rtrim($current, '/\\') . DIRECTORY_SEPARATOR . $part;
+            if (is_link($current)) {
+                $target = @readlink($current);
+                if (!is_string($target) || $target === '') { return null; }
+                if (!preg_match('~^(?:[A-Za-z]:[\\\\/]|/)~', $target)) {
+                    $target = dirname($current) . DIRECTORY_SEPARATOR . $target;
+                }
+                $suffix = array_slice($parts, $i + 1);
+                $path = rl_normalize_path($target . ($suffix ? DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $suffix) : ''));
+                $restarted = true;
+                break;
+            }
+            if (!file_exists($current)) {
+                // No later component can exist beneath a missing directory;
+                // keep the suffix lexical and verify against this ancestor.
+                $real = realpath(dirname($current));
+                if ($real === false) { return null; }
+                $remaining = array_slice($parts, $i);
+                return rl_normalize_path($real . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $remaining));
+            }
+        }
+        if (!$restarted) {
+            $real = realpath($path);
+            return $real === false ? null : rl_normalize_path($real);
+        }
+    }
+    return null;
 }
 
 /**
