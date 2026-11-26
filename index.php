@@ -56,6 +56,7 @@ $routes = [
     '/'            => 'pages/home-redesign.php',
     '/about'       => 'pages/about.php',
     '/services'    => 'pages/services.php',
+    '/it-support'  => 'pages/it-support.php',
     '/projects'    => 'pages/projects.php',
     '/contact'     => 'pages/contact.php',
     '/sitemap.xml' => 'sitemap.xml.php',

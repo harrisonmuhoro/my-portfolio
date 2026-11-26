@@ -100,6 +100,12 @@ define('OG_IMAGE',       SITE_URL . '/assets/images/og-image.webp');
 define('OG_TYPE',        'website');
 define('TWITTER_CARD',   'summary_large_image');
 
+// ─── IT SUPPORT & NETWORKING ─────────────────────────────────────────────────
+// Server-side allowlists — the client never dictates these values.
+define('IT_SUPPORT_CATEGORIES', ['network', 'troubleshooting', 'software', 'business', 'other']);
+define('IT_SUPPORT_METHODS',    ['onsite', 'remote']);
+define('IT_SUPPORT_LANGS',      ['en', 'sw']);
+
 // ─── SECURITY ─────────────────────────────────────────────────────────────────
 define('CSRF_TOKEN_NAME', 'csrf_token');
 define('APP_SECRET',      getenv('APP_SECRET') ?: 'fallback-change-in-production');

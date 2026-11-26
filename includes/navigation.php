@@ -16,6 +16,7 @@ require_once __DIR__ . '/../config/config.php';
             <li><a href="<?= BASE_PATH ?>/#work" class="nav-link">Work</a></li>
             <li><a href="<?= BASE_PATH ?>/about" class="nav-link">About</a></li>
             <li><a href="<?= BASE_PATH ?>/projects" class="nav-link">Projects</a></li>
+            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-link">IT Support</a></li>
             <li><a href="<?= BASE_PATH ?>/#contact" class="nav-link">Contact</a></li>
             <li>
                 <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light mode">
@@ -44,6 +45,7 @@ require_once __DIR__ . '/../config/config.php';
             <li><a href="<?= BASE_PATH ?>/#work" class="nav-mobile__link" tabindex="-1">Work</a></li>
             <li><a href="<?= BASE_PATH ?>/about" class="nav-mobile__link" tabindex="-1">About</a></li>
             <li><a href="<?= BASE_PATH ?>/projects" class="nav-mobile__link" tabindex="-1">Projects</a></li>
+            <li><a href="<?= BASE_PATH ?>/it-support" class="nav-mobile__link" tabindex="-1">IT Support</a></li>
             <li><a href="<?= BASE_PATH ?>/#contact" class="nav-mobile__link" tabindex="-1">Contact</a></li>
             <li><a href="<?= CV_PATH ?>" target="_blank" rel="noopener noreferrer" class="nav-mobile__link" tabindex="-1">CV</a></li>
         </ul>

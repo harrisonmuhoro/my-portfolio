@@ -19,6 +19,7 @@ require_once __DIR__ . '/../config/config.php';
                     <li><a href="<?= BASE_PATH ?>/about">About</a></li>
                     <li><a href="<?= BASE_PATH ?>/projects">Projects</a></li>
                     <li><a href="<?= BASE_PATH ?>/services">Services</a></li>
+                    <li><a href="<?= BASE_PATH ?>/it-support">IT Support</a></li>
                     <li><a href="<?= BASE_PATH ?>/contact">Contact</a></li>
                 </ul>
             </nav>

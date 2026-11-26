@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/config.php';
 // Page-specific overrides (set before including header)
 $page_title       = $page_title       ?? SITE_NAME . ' — ' . PRIMARY_TITLE;
 $page_description = $page_description ?? SITE_DESCRIPTION;
+$seo_keywords     = $seo_keywords     ?? SEO_KEYWORDS;
 
 // Clean REQUEST_URI — strip query strings from canonical
 $clean_uri        = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/';
@@ -31,7 +32,7 @@ $base = rtrim(BASE_PATH, '/');
     <!-- ── Primary SEO ── -->
     <title><?= htmlspecialchars($page_title) ?></title>
     <meta name="description" content="<?= htmlspecialchars($page_description) ?>">
-    <meta name="keywords"    content="<?= htmlspecialchars(SEO_KEYWORDS) ?>">
+    <meta name="keywords"    content="<?= htmlspecialchars($seo_keywords) ?>">
     <meta name="author"      content="<?= htmlspecialchars(SEO_AUTHOR) ?>">
     <meta name="robots"      content="<?= htmlspecialchars(SEO_ROBOTS) ?>">
     <link rel="canonical"    href="<?= htmlspecialchars($page_canonical) ?>">

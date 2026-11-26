@@ -68,6 +68,12 @@ $pages = [
         'priority'   => '0.8',
     ],
     [
+        'loc'        => $baseUrl . '/it-support',
+        'file'       => PROJECT_ROOT . '/pages/it-support.php',
+        'changefreq' => 'monthly',
+        'priority'   => '0.8',
+    ],
+    [
         'loc'        => $baseUrl . '/contact',
         'file'       => PROJECT_ROOT . '/pages/contact.php',
         'changefreq' => 'monthly',
