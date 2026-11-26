@@ -113,6 +113,57 @@ ok(mail_addr('Test "User"', 'a@b.com') === '"Test \\"User\\"" <a@b.com>', 'mail_
 ok(mail_addr("Bad\r\nName", 'a@b.com') === '"Bad Name" <a@b.com>', 'mail_addr strips CRLF injection');
 ok(mail_addr('', 'a@b.com') === '<a@b.com>', 'mail_addr handles empty name');
 
+// MAIL_TO recipient precedence: MAIL_TO env → CONTACT_EMAIL env → approved
+// default. Probed in a subprocess with a controlled environment so the
+// constants are resolved fresh; the probe only echoes values, never sends.
+echo "== mail recipient precedence ==\n";
+
+$mailProbe = function (array $set, array $unset = ['MAIL_TO', 'CONTACT_EMAIL']): array {
+    $env = getenv();
+    if (!is_array($env)) { $env = []; }
+    foreach ($unset as $k) { unset($env[$k]); }
+    foreach ($set as $k => $v) { $env[$k] = $v; }
+    $process = proc_open(
+        [PHP_BINARY, '-d', 'xdebug.mode=off', PROJECT_ROOT . '/tests/mail_probe.php'],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+        $pipes, null, $env);
+    $out = '';
+    if (is_resource($process)) {
+        fclose($pipes[0]);
+        $out = (string) stream_get_contents($pipes[1]);
+        $err = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+        if ($err !== '') { error_log(trim($err)); }
+    }
+    $res = [];
+    foreach (explode("\n", trim($out)) as $line) {
+        if (str_contains($line, '=')) {
+            [$k, $v] = explode('=', $line, 2);
+            $res[trim($k)] = trim($v);
+        }
+    }
+    return $res;
+};
+
+$def  = $mailProbe([]);
+$ce   = $mailProbe(['CONTACT_EMAIL' => 'contact-override@example.com']);
+$mt   = $mailProbe(['MAIL_TO' => 'mail-to-override@example.com']);
+$both = $mailProbe(['MAIL_TO' => 'mail-to-override@example.com',
+                    'CONTACT_EMAIL' => 'contact-override@example.com']);
+
+ok(($def['MAIL_TO'] ?? '') === 'zionmuhoro@gmail.com',
+    'MAIL_TO falls back to the approved default recipient');
+ok(($ce['MAIL_TO'] ?? '') === 'contact-override@example.com',
+    'MAIL_TO uses CONTACT_EMAIL when MAIL_TO env is absent');
+ok(($mt['MAIL_TO'] ?? '') === 'mail-to-override@example.com',
+    'MAIL_TO env overrides the default recipient');
+ok(($both['MAIL_TO'] ?? '') === 'mail-to-override@example.com',
+    'MAIL_TO env takes precedence over CONTACT_EMAIL');
+ok(($def['MAIL_FROM'] ?? '') === 'no-reply@harrisonmuhoro.me',
+    'MAIL_FROM is unchanged by recipient precedence');
+
 // ── handler integration probes ──────────────────────────────
 echo "== handler probes ==\n";
 
@@ -893,13 +944,37 @@ ok(str_contains($seoHtml['/'], 'Software Developer &amp; Technology Consultant')
     'homepage presents the approved primary title');
 ok(str_contains($seoHtml['/about'], 'Software Developer &amp; Technology Consultant'),
     'about page presents the approved primary title');
-ok(str_contains($seoHtml['/contact'], 'linkedin.com/in/harrison-muhoro'),
-    'contact page links the confirmed LinkedIn profile');
+// Exact canonical LinkedIn URL — no substring-only assertions.
+$canonicalLinkedIn = 'https://www.linkedin.com/in/harrison-muhoro/';
+ok(in_array($canonicalLinkedIn, $sameAs, true),
+    'Person sameAs contains the exact canonical LinkedIn URL');
+
+// Every rendered LinkedIn anchor (contact page, homepage, footer, …) must
+// point at the exact canonical URL — parsed from href attributes, not substrings.
+$liAnchorsOk = true;
+$liAnchorCount = 0;
+foreach ($seoHtml as $uri => $h) {
+    preg_match_all('~href="([^"]*linkedin\.com/in/[^"]*)"~', $h, $m);
+    foreach ($m[1] as $href) {
+        $liAnchorCount++;
+        if (html_entity_decode($href) !== $canonicalLinkedIn) { $liAnchorsOk = false; }
+    }
+}
+ok($liAnchorCount > 0 && $liAnchorsOk,
+    'every LinkedIn anchor uses the exact canonical URL');
+$contactHasLi = false;
+if (preg_match('~<a[^>]+href="([^"]*linkedin\.com/in/[^"]*)"[^>]*class="[^"]*contact-channel~', $seoHtml['/contact'], $cm)) {
+    $contactHasLi = html_entity_decode($cm[1]) === $canonicalLinkedIn;
+}
+ok($contactHasLi, 'contact page anchor destination is the exact canonical LinkedIn URL');
+
 $oldUrlFound = false;
 foreach ($seoHtml as $h) {
-    if (str_contains($h, 'zion-harrison')) { $oldUrlFound = true; }
+    if (str_contains($h, 'zion-harrison') || str_contains($h, 'harrison-muhoro-6476b33a8')) {
+        $oldUrlFound = true;
+    }
 }
-ok(!$oldUrlFound, 'no public page publishes the outdated LinkedIn URL');
+ok(!$oldUrlFound, 'no public page publishes a superseded LinkedIn URL');
 ok(str_contains($seoHtml['/it-support?lang=en'], 'Two years of combined hands-on experience')
     && str_contains($seoHtml['/it-support?lang=en'], '2 years combined experience'),
     'English IT Support states combined (not per-area) experience');

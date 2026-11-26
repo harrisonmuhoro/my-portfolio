@@ -20,7 +20,9 @@
 | `tests/run_tests.php` | LinkedIn `sameAs` expectation updated to confirmed URL; ~11 new assertions: `jobTitle` consistency, no stale `zion-harrison` URL on any public page, combined-experience EN/SW checks, AZ-900 "In progress", contact-page LinkedIn destination |
 | `docs/PHASE_2_1_PERSONAL_ENTITY_BASELINE_AUDIT.md` | Corrected per owner evidence (LinkedIn screenshot, confirmed URL, owner decisions) |
 
-**LinkedIn URL note:** during implementation the config initially carried `…/in/harrison-muhoro/` (slug truncated). Caught on diff review and corrected to the owner-confirmed `…/in/harrison-muhoro/` in `config.php`, `config.example.php` and the test expectation before commit. Contact/homepage links resolve through `SOCIAL_LINKS` — single source, no hardcoded duplicates.
+**LinkedIn URL — final canonical value:** `https://www.linkedin.com/in/harrison-muhoro/`. This owner-confirmed URL supersedes both the original `linkedin.com/in/zion-harrison` and the intermediate slugged variant `…/in/harrison-muhoro-6476b33a8/` (which appeared transiently during implementation and in the owner-supplied screenshot). All links resolve through `SOCIAL_LINKS['linkedin']` — single source, no hardcoded duplicates. Tests assert the exact URL (sameAs membership, every rendered `href`, contact-page anchor) and reject both superseded variants on all public pages.
+
+**Mail recipient precedence (corrected):** `MAIL_TO` = `MAIL_TO` env → `CONTACT_EMAIL` env → `zionmuhoro@gmail.com` (approved default). Previously `config.php` ignored the `MAIL_TO` env var and `config.example.php`/`config.local.php` ignored the `CONTACT_EMAIL` fallback — runtime behavior now matches documentation in all three files. `MAIL_FROM` and Resend settings unchanged.
 
 ### GitHub profile README (`harrisonmuhoro/harrisonmuhoro`)
 
@@ -39,7 +41,7 @@ Commit `eb00a79` — "Clarify combined two-year experience and consulting positi
 
 ```
 php tests/run_tests.php
-→ 118 passed, 0 failed, 1 skipped (symlink cases — run on Linux CI)
+→ 125 passed, 0 failed, 1 skipped (symlink cases — run on Linux CI)
 php -l config/config.php config/config.example.php → clean
 ```
 

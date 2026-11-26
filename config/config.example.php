@@ -70,7 +70,7 @@ define('TWITTER_CARD', 'summary_large_image');
 define('RESEND_API_KEY', getenv('RESEND_API_KEY') ?: '');
 define('RESEND_API_URL', getenv('RESEND_API_URL') ?: 'https://api.resend.com/emails');
 define('MAIL_FROM',      getenv('MAIL_FROM')      ?: 'no-reply@harrisonmuhoro.me');
-define('MAIL_TO',        getenv('MAIL_TO')        ?: 'zionmuhoro@gmail.com');
+define('MAIL_TO',        getenv('MAIL_TO')        ?: getenv('CONTACT_EMAIL') ?: 'zionmuhoro@gmail.com');
 
 // ─── RATE LIMITER ───────────────────────────────────────────
 // RATE_LIMIT_DIR:      persistent dir for limiter state (default:
