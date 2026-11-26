@@ -18,6 +18,9 @@
 
 error_reporting(E_ALL);
 define('PROJECT_ROOT', dirname(__DIR__));
+// WAMP's configured session directory may be unavailable to the CLI user.
+// Use the system temp directory consistently for the suite and probe workers.
+ini_set('session.save_path', sys_get_temp_dir());
 
 require_once PROJECT_ROOT . '/config/config.php';
 require_once PROJECT_ROOT . '/includes/i18n.php';
@@ -134,8 +137,19 @@ function stop_stub($server, string $nullFile): void {
 function probe(array $spec): array {
     $file = tempnam(sys_get_temp_dir(), 'probe_') . '.json';
     file_put_contents($file, json_encode($spec));
-    $cmd = 'php ' . escapeshellarg(PROJECT_ROOT . '/tests/handler_probe.php') . ' ' . escapeshellarg($file);
-    $out = (string) shell_exec($cmd);
+    $process = proc_open([PHP_BINARY, '-d', 'xdebug.mode=off', PROJECT_ROOT . '/tests/handler_probe.php', $file],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (is_resource($process)) {
+        fclose($pipes[0]);
+        $out = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        proc_close($process);
+        if ($stderr !== '') { error_log(trim($stderr)); }
+    } else {
+        $out = '';
+    }
     @unlink($file);
 
     $http = 200;
@@ -145,6 +159,13 @@ function probe(array $spec): array {
     }
     $json = json_decode(trim($out), true);
     return ['json' => is_array($json) ? $json : null, 'http' => $http, 'raw' => $out];
+}
+
+/** Remove the PHP session file created by a persistent-session probe. */
+function cleanup_probe_session(string $id): void {
+    $savePath = sys_get_temp_dir();
+    $savePath = $savePath !== '' ? $savePath : sys_get_temp_dir();
+    @unlink(rtrim($savePath, '/\\') . DIRECTORY_SEPARATOR . 'sess_' . $id);
 }
 
 $basePost = [
@@ -230,7 +251,7 @@ fclose($tmpSock);
 
 $nullFile = tempnam(sys_get_temp_dir(), 'stub_null_');
 $server = proc_open(
-    'php -S 127.0.0.1:' . $stubPort . ' ' . escapeshellarg(PROJECT_ROOT . '/tests/resend_stub.php'),
+    [PHP_BINARY, '-d', 'xdebug.mode=off', '-S', '127.0.0.1:' . $stubPort, PROJECT_ROOT . '/tests/resend_stub.php'],
     [0 => ['pipe', 'r'], 1 => ['file', $nullFile, 'a'], 2 => ['file', $nullFile, 'a']],
     $pipes
 );
@@ -342,44 +363,52 @@ for ($i = 0; $i < FORM_RATE_LIMIT + 1; $i++) {
 ok(in_array(429, $codes, true), 'rate limit returns 429 after ' . FORM_RATE_LIMIT . ' submissions (got: ' . implode(',', $codes) . ')');
 ok(end($codes) === 429, 'the (limit+1)th request is the blocked one');
 
-// ── CSRF rotation: repeat submission without page refresh ────
+// ── CSRF rotation: repeat submission through one persisted PHP session ──
 echo "== CSRF token rotation ==\n";
 
-// First submission succeeds and returns a rotated token. The second
-// submission reuses that token (as the browser would after JS updates the
-// hidden field) — it must NOT hit a 403.
-$r1 = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv));
+// A stable session ID models a browser session cookie across independent
+// handler processes. The returned token must be in PHP's persisted session.
+$itSessionId = 'itrotate' . bin2hex(random_bytes(8));
+$itFirst = $mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv);
+$itFirst['session_id'] = $itSessionId;
+$r1 = probe($itFirst);
 $newToken = $r1['json']['csrf_token'] ?? null;
 ok(($r1['json']['success'] ?? false) === true
     && is_string($newToken) && $newToken !== '' && $newToken !== 'test-token-123',
     'IT support success returns a rotated csrf_token');
-
 if (is_string($newToken) && $newToken !== '') {
-    $r2 = probe($mkSpec(['csrf_token' => $newToken], ['csrf_token' => $newToken], $providerEnv));
+    $itSecond = $mkSpec(['csrf_token' => $newToken], [], $providerEnv);
+    $itSecond['session_id'] = $itSessionId;
+    $r2 = probe($itSecond);
     ok(($r2['json']['success'] ?? false) === true && $r2['http'] === 200,
-        'second IT support submission with rotated token succeeds (no 403)');
-
-    // The pre-rotation token must now be rejected.
-    $r3 = probe($mkSpec(['csrf_token' => 'test-token-123'], ['csrf_token' => $newToken], $providerEnv));
-    ok($r3['http'] === 403, 'old IT support token rejected after rotation');
+        'IT support rotated token succeeds in the same persisted PHP session');
+    $itOld = $mkSpec(['csrf_token' => 'test-token-123'], [], $providerEnv);
+    $itOld['session_id'] = $itSessionId;
+    $r3 = probe($itOld);
+    ok($r3['http'] === 403, 'old IT support token rejected in that same session');
 }
 
-$c1 = probe($mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv));
+$contactSessionId = 'contactrotate' . bin2hex(random_bytes(8));
+$contactFirst = $mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv);
+$contactFirst['session_id'] = $contactSessionId;
+$c1 = probe($contactFirst);
 $cNewToken = $c1['json']['csrf_token'] ?? null;
 ok(($c1['json']['success'] ?? false) === true
     && is_string($cNewToken) && $cNewToken !== '' && $cNewToken !== 'test-token-123',
     'contact success returns a rotated csrf_token');
-
 if (is_string($cNewToken) && $cNewToken !== '') {
-    $c2 = probe($mkContact(['csrf_token' => $cNewToken], ['csrf_token' => $cNewToken], $providerEnv));
+    $contactSecond = $mkContact(['csrf_token' => $cNewToken], [], $providerEnv);
+    $contactSecond['session_id'] = $contactSessionId;
+    $c2 = probe($contactSecond);
     ok(($c2['json']['success'] ?? false) === true && $c2['http'] === 200,
-        'second contact submission with rotated token succeeds (no 403)');
-
-    // The pre-rotation token must now be rejected.
-    $c3 = probe($mkContact(['csrf_token' => 'test-token-123'], ['csrf_token' => $cNewToken], $providerEnv));
-    ok($c3['http'] === 403, 'old contact token rejected after rotation');
+        'contact rotated token succeeds in the same persisted PHP session');
+    $contactOld = $mkContact(['csrf_token' => 'test-token-123'], [], $providerEnv);
+    $contactOld['session_id'] = $contactSessionId;
+    $c3 = probe($contactOld);
+    ok($c3['http'] === 403, 'old contact token rejected in that same session');
 }
-
+cleanup_probe_session($itSessionId);
+cleanup_probe_session($contactSessionId);
 // ── Rate limiter failure policy ──────────────────────────────
 echo "== rate limiter failure policy ==\n";
 
@@ -389,6 +418,38 @@ $deadEnv = [
     'RESEND_API_KEY' => 'test-key',
     'RESEND_API_URL' => 'http://127.0.0.1:1/emails',
 ];
+
+$missingProdDir = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv);
+$missingProdDir['host'] = 'portfolio.example';
+$missingProdDir['env']['APP_ENV'] = 'production';
+$r = probe($missingProdDir);
+ok($r['http'] === 429, 'production with missing RATE_LIMIT_DIR defaults closed');
+
+$invalidProdDir = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $badDirFile,
+]);
+$invalidProdDir['host'] = 'portfolio.example';
+$r = probe($invalidProdDir);
+ok($r['http'] === 429, 'production with invalid RATE_LIMIT_DIR denies requests');
+
+$inRootProdDirPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'rl_public_' . bin2hex(random_bytes(6));
+mkdir($inRootProdDirPath);
+$inRootProdDir = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+    'APP_ENV' => 'production',
+    'RATE_LIMIT_DIR' => $inRootProdDirPath . DIRECTORY_SEPARATOR . 'rate_limits',
+]);
+$inRootProdDir['host'] = 'portfolio.example';
+$inRootProdDir['document_root'] = $inRootProdDirPath;
+$r = probe($inRootProdDir);
+ok($r['http'] === 429, 'production storage resolving under DOCUMENT_ROOT is rejected');
+foreach (glob($inRootProdDirPath . DIRECTORY_SEPARATOR . 'rate_limits' . DIRECTORY_SEPARATOR . '*') ?: [] as $file) { @unlink($file); }
+@rmdir($inRootProdDirPath . DIRECTORY_SEPARATOR . 'rate_limits');
+@rmdir($inRootProdDirPath);
+
+$localFallback = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv);
+$r = probe($localFallback);
+ok($r['http'] === 503, 'development fallback operates and reaches mail stage');
 
 $r = probe($mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
     'RATE_LIMIT_DIR'       => $badDirFile,

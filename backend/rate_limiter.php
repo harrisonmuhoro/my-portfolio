@@ -2,21 +2,19 @@
 /**
  * backend/rate_limiter.php — Shared server-side fixed-window rate limiter.
  *
- * Stores counters in per-bucket files under the system temp dir, guarded by
+ * Stores counters in per-bucket files under configured or local storage, guarded by
  * flock() so concurrent requests update atomically. Keyed by a hash of the
  * caller identity (IP + form bucket), so clearing cookies or opening a new
  * browser session does not reset the limit.
  *
  * STORAGE & FAILURE POLICY
  * ------------------------
- * - State lives in RATE_LIMIT_DIR when configured. Otherwise the first
- *   writable of: a sibling directory next to DOCUMENT_ROOT (outside the
- *   web root on Apache-style hosts), PROJECT_ROOT/storage/rate_limits,
- *   then the system temp dir. Point RATE_LIMIT_DIR at a persistent
- *   directory outside the public web root in production — the in-project
- *   fallback relies on Apache access controls, and .htaccess/index.php
- *   guards are defense-in-depth only, NOT a universal protection
- *   mechanism (they do nothing on nginx or misconfigured Apache).
+ * - Production requires RATE_LIMIT_DIR: an absolute, writable, persistent
+ *   directory outside DOCUMENT_ROOT. Missing, relative, or in-root paths are
+ *   treated as storage failures; production defaults to fail-closed. This
+ *   cannot verify volume persistence, so hosting must provide that guarantee.
+ * - Development may fall back to a sibling of DOCUMENT_ROOT, project storage,
+ *   then system temp. In-project guards are defense-in-depth only.
  * - Designed for a single application instance with a shared local
  *   filesystem (WAMP, typical shared hosting, single-container PaaS such as
  *   Wasmer Edge). If the app ever runs across multiple instances/containers
@@ -25,11 +23,8 @@
  * - Client identity uses REMOTE_ADDR only. X-Forwarded-For / Client-IP are
  *   deliberately ignored because they are client-spoofable unless a trusted
  *   proxy is configured (none is, today).
- * - Failure policy is configurable via RATE_LIMIT_FAIL_MODE:
- *     'open'   (default) — storage failures allow the request and are logged.
- *     'closed' — storage failures deny the request (HTTP 429) and are logged.
- *   Default is 'open' so a contact form stays reachable during storage
- *   incidents; CSRF, honeypot and input validation still apply either way.
+ * - Failure policy is configurable via RATE_LIMIT_FAIL_MODE. Production
+ *   defaults to 'closed'; development defaults to 'open'.
  *   Corrupted state files are treated as an expired window.
  * - Retention: bucket files are deleted opportunistically (~2% of requests)
  *   once they are older than twice the rate-limit window.
@@ -45,15 +40,21 @@ if (!defined('PROJECT_ROOT')) {
 /**
  * Resolve a writable state directory, or '' when none is available.
  *
- * When RATE_LIMIT_DIR is explicitly configured it is authoritative — no
- * silent fallback, so a misconfigured path surfaces via the fail policy
- * instead of scattering state across locations. Otherwise prefer the
- * persistent in-project storage dir, then the system temp dir.
+ * Configured production storage is authoritative. Development can use
+ * guarded local fallbacks when RATE_LIMIT_DIR is not set.
  */
 function rl_storage_dir(): string {
     $candidates = [];
-    if (defined('RATE_LIMIT_DIR') && trim((string) RATE_LIMIT_DIR) !== '') {
-        $candidates[] = rtrim((string) RATE_LIMIT_DIR, '/\\');
+    $production = defined('ENVIRONMENT') && ENVIRONMENT === 'production';
+    $configured = defined('RATE_LIMIT_DIR') ? trim((string) RATE_LIMIT_DIR) : '';
+    if ($production) {
+        if ($configured === '' || !preg_match('~^(?:[A-Za-z]:[\\\\/]|/)~', $configured)) {
+            error_log('[RateLimiter] production requires an absolute RATE_LIMIT_DIR');
+            return '';
+        }
+        $candidates[] = rtrim($configured, '/\\');
+    } elseif ($configured !== '') {
+        $candidates[] = rtrim($configured, '/\\');
     } else {
         // Preferred fallback: a directory beside DOCUMENT_ROOT — outside the
         // served tree on Apache-style hosts. Skipped when DOCUMENT_ROOT is
@@ -76,12 +77,31 @@ function rl_storage_dir(): string {
             error_log('[RateLimiter] storage directory not writable: ' . $dir);
             continue;
         }
+        if ($production) {
+            $resolvedDir = realpath($dir);
+            $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? realpath((string) $_SERVER['DOCUMENT_ROOT']) : false;
+            if ($resolvedDir === false || ($docRoot !== false && rl_path_is_within($resolvedDir, $docRoot))) {
+                error_log('[RateLimiter] production RATE_LIMIT_DIR must resolve outside DOCUMENT_ROOT');
+                return '';
+            }
+        }
         rl_guard_web_dir($dir);
         return $dir;
     }
 
     error_log('[RateLimiter] no writable storage directory available');
     return '';
+}
+
+/** True when $path equals or is below $parent, accounting for Windows paths. */
+function rl_path_is_within(string $path, string $parent): bool {
+    $path = rtrim(str_replace('\\', '/', $path), '/') . '/';
+    $parent = rtrim(str_replace('\\', '/', $parent), '/') . '/';
+    if (DIRECTORY_SEPARATOR === '\\' || preg_match('/^[A-Za-z]:/', $path)) {
+        $path = strtolower($path);
+        $parent = strtolower($parent);
+    }
+    return str_starts_with($path, $parent);
 }
 
 /** Drop Apache/PHP guard files when state lives inside the web root. */

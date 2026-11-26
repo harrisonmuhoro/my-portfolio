@@ -167,10 +167,15 @@
     });
 
     // ── Submit ────────────────────────────────────────────────
+    var submitting = false;
+
     form.addEventListener('submit', function (e) {
         e.preventDefault();
 
+        if (submitting) return;
         if (!validateForm()) return;
+
+        submitting = true;
 
         if (successEl) successEl.hidden = true;
         if (errorEl)   errorEl.hidden   = true;
@@ -208,6 +213,7 @@
             if (errorText) errorText.textContent = err.message || t('err_generic');
         })
         .finally(function () {
+            submitting = false;
             if (submitBtn)   submitBtn.disabled = false;
             if (submitLabel) submitLabel.textContent = t('f_submit') || 'Send request';
         });

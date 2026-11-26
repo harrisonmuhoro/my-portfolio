@@ -129,12 +129,13 @@ define('FORM_RATE_LIMIT', 3);
 define('ALLOWED_FILE_TYPES', []);
 
 // ─── RATE LIMITER STORAGE ────────────────────────────────────────────────────
-// RATE_LIMIT_DIR:      optional persistent path for limiter state files.
-//                      Empty = PROJECT_ROOT/storage/rate_limits, then temp.
-// RATE_LIMIT_FAIL_MODE: 'open' (default, allow on storage failure) or
-//                      'closed' (deny with 429 on storage failure).
+// RATE_LIMIT_DIR:      required in production; persistent, writable, absolute
+//                      path outside the public web root. Development may use
+//                      safe local fallbacks.
+// RATE_LIMIT_FAIL_MODE: production defaults to 'closed'; development defaults
+//                      to 'open'. Explicit values may override either default.
 if (!defined('RATE_LIMIT_DIR'))       define('RATE_LIMIT_DIR',       getenv('RATE_LIMIT_DIR') ?: '');
-if (!defined('RATE_LIMIT_FAIL_MODE')) define('RATE_LIMIT_FAIL_MODE', getenv('RATE_LIMIT_FAIL_MODE') ?: 'open');
+if (!defined('RATE_LIMIT_FAIL_MODE')) define('RATE_LIMIT_FAIL_MODE', getenv('RATE_LIMIT_FAIL_MODE') ?: (ENVIRONMENT === 'production' ? 'closed' : 'open'));
 
 // ─── ERROR HANDLING ───────────────────────────────────────────────────────────
 if (DEBUG_MODE) {

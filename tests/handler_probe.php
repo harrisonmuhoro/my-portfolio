@@ -29,23 +29,40 @@ define('PROJECT_ROOT', dirname(__DIR__));
 foreach (($spec['env'] ?? []) as $k => $v) {
     putenv($k . '=' . $v);
 }
+// Simulate deployment environment even when this checkout has an untracked
+// config/config.local.php that forces development mode.
+if (getenv('APP_ENV') !== false && !defined('ENVIRONMENT')) {
+    define('ENVIRONMENT', getenv('APP_ENV'));
+}
 
 // Handler name is restricted to a basename inside backend/ — no traversal.
 $handler = basename($spec['handler'] ?? 'it_support_handler.php');
 
 $_SERVER['REQUEST_METHOD'] = strtoupper($spec['method'] ?? 'POST');
 $_SERVER['REMOTE_ADDR']     = $spec['ip'] ?? '203.0.113.10';
-$_SERVER['HTTP_HOST']       = 'localhost';
+$_SERVER['HTTP_HOST']       = $spec['host'] ?? 'localhost';
 $_SERVER['REQUEST_URI']     = '/backend/' . $handler;
 $_SERVER['SERVER_NAME']     = 'localhost';
+if (isset($spec['document_root'])) {
+    $_SERVER['DOCUMENT_ROOT'] = $spec['document_root'];
+}
 $_POST  = $spec['post']    ?? [];
 $_GET   = $spec['get']     ?? [];
 $_COOKIE = [];
 
-// Fresh session per probe; seed it with the spec's session values.
-session_id('probe-' . bin2hex(random_bytes(8)));
+// A supplied ID lets sequential subprocess probes share PHP's persisted
+// session storage, just as a browser reuses its session cookie.
+$sessionId = $spec['session_id'] ?? ('probe' . bin2hex(random_bytes(8)));
+if (!preg_match('/^[A-Za-z0-9,-]{1,128}$/', $sessionId)) {
+    fwrite(STDERR, "invalid session id\n");
+    exit(2);
+}
+session_id($sessionId);
+session_save_path(sys_get_temp_dir());
 session_start();
-$_SESSION = $spec['session'] ?? [];
+if (empty($spec['session_id']) || empty($_SESSION)) {
+    $_SESSION = $spec['session'] ?? [];
+}
 
 // Report the final HTTP status after json_response() exits.
 register_shutdown_function(function () {
