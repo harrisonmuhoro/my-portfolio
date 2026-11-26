@@ -73,6 +73,13 @@ ok(t('hero_title', 'fr') === t('hero_title', 'en'), 'invalid language falls back
 // ── rate limiter ────────────────────────────────────────────
 echo "== rate limiter ==\n";
 
+if (DIRECTORY_SEPARATOR === '\\') {
+    $driveProbe = rtrim(str_replace('\\', '/', sys_get_temp_dir()), '/') . '/rl_path_probe';
+    $driveResolved = rl_resolve_path_symlinks($driveProbe);
+    ok($driveResolved !== null && str_starts_with(strtolower($driveResolved), strtolower(str_replace('\\', '/', realpath(sys_get_temp_dir())) . '/')),
+        'Windows drive-letter path resolves without duplicating its drive component');
+}
+
 $bucket = 'test:' . uniqid('', true);
 ok(rate_limit_hit($bucket, 2, 2) === 0, 'first hit allowed');
 ok(rate_limit_hit($bucket, 2, 2) === 0, 'second hit allowed');
@@ -115,7 +122,13 @@ echo "== handler probes ==\n";
  * process actually exited and fall back to taskkill there.
  */
 function stop_stub($server, string $nullFile): void {
+    static $stopped = [];
     if (is_resource($server)) {
+        $resourceId = get_resource_id($server);
+        if (isset($stopped[$resourceId])) {
+            @unlink($nullFile);
+            return;
+        }
         $pid = null;
         $st  = proc_get_status($server);
         if (is_array($st) && isset($st['pid'])) { $pid = (int) $st['pid']; }
@@ -127,11 +140,14 @@ function stop_stub($server, string $nullFile): void {
                 pclose(popen('taskkill /PID ' . $pid . ' /F /T >NUL 2>&1', 'r'));
             }
             usleep(200000);
+            // taskkill terminates the server process tree. proc_close() can
+            // block indefinitely on the Windows process handle after that.
         } else {
             proc_terminate($server);
             usleep(200000);
+            @proc_close($server);
         }
-        @proc_close($server);
+        $stopped[$resourceId] = true;
     }
     @unlink($nullFile);
 }
@@ -586,12 +602,15 @@ $symProbe = $symBase . '_probe';
 if (@symlink($symOutside, $symProbe)) {
     @unlink($symProbe);
     $cases = [
-        ['dangling link into public root', $symBase . '_in', $symWeb . DIRECTORY_SEPARATOR . 'not_created', true],
-        ['dangling link outside public root', $symBase . '_out', $symOutside . DIRECTORY_SEPARATOR . 'not_created', false],
-        ['link to existing external directory', $symBase . '_external', $symOutside, false],
-        ['link to existing directory inside public root', $symBase . '_inside', $symWeb, true],
+        ['dangling link into public root', $symBase . '_in', $symWeb . DIRECTORY_SEPARATOR . 'not_created', true, false],
+        ['dangling link outside public root', $symBase . '_out', $symOutside . DIRECTORY_SEPARATOR . 'not_created', false, false],
+        ['relative dangling link outside public root', $symBase . '_relative_dangling', basename($symOutside) . DIRECTORY_SEPARATOR . 'relative_missing', false, true],
+        ['link to existing external directory', $symBase . '_external', $symOutside, false, false],
+        ['relative link to existing external directory', $symBase . '_relative_external', basename($symOutside), false, true],
+        ['link to existing directory inside public root', $symBase . '_inside', $symWeb, true, false],
     ];
-    foreach ($cases as [$label, $link, $target, $reject]) {
+    foreach ($cases as [$label, $link, $target, $reject, $relative]) {
+        $expectedTarget = $relative ? dirname($link) . DIRECTORY_SEPARATOR . $target : $target;
         if (!@symlink($target, $link)) {
             echo "  SKIP  $label (symlink creation unavailable)\n";
             continue;
@@ -604,9 +623,34 @@ if (@symlink($symOutside, $symProbe)) {
         $r = probe($spec);
         ok($r['http'] === ($reject ? 429 : 503), 'production ' . ($reject ? 'rejects' : 'accepts') . ' ' . $label);
         if ($reject && str_contains($label, 'dangling link into')) {
-            ok(!file_exists($symWeb . DIRECTORY_SEPARATOR . 'not_created'), 'dangling in-root target is not created before rejection');
+            ok(!file_exists($expectedTarget), 'dangling in-root target is not created before rejection');
+        } elseif ($reject && str_contains($label, 'inside public root')) {
+            ok(!file_exists($expectedTarget . DIRECTORY_SEPARATOR . 'rate_limits'), 'existing in-root symlink target remains untouched');
+        } elseif (str_contains($label, 'dangling link outside')) {
+            ok(is_dir($expectedTarget . DIRECTORY_SEPARATOR . 'rate_limits'), 'verified dangling external target is created at its resolved location');
         }
+        $createdStore = $expectedTarget . DIRECTORY_SEPARATOR . 'rate_limits';
+        foreach ((array) glob($createdStore . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
+        @rmdir($createdStore);
+        if (str_contains($label, 'dangling link outside')) { @rmdir($expectedTarget); }
         @unlink($link);
+    }
+    $loopA = $symBase . '_loop_a';
+    $loopB = $symBase . '_loop_b';
+    if (@symlink($loopB, $loopA) && @symlink($loopA, $loopB)) {
+        $loopSpec = $mkSpec(['csrf_token' => 'test-token-123'], [], $deadEnv + [
+            'APP_ENV' => 'production', 'RATE_LIMIT_DIR' => $loopA . DIRECTORY_SEPARATOR . 'rate_limits',
+        ]);
+        $loopSpec['host'] = 'portfolio.example';
+        $loopSpec['document_root'] = $symWeb;
+        $r = probe($loopSpec);
+        ok($r['http'] === 429 && !file_exists($loopA . DIRECTORY_SEPARATOR . 'rate_limits'), 'production fails closed on symlink loop before creating storage');
+        @unlink($loopA);
+        @unlink($loopB);
+    } else {
+        echo "  SKIP  symlink loop case (symlink creation unavailable)\n";
+        @unlink($loopA);
+        @unlink($loopB);
     }
 } else {
     echo "  SKIP  symlink regression cases (symlink() unavailable on this platform)\n";
@@ -619,6 +663,7 @@ $ordinarySpec['host'] = 'portfolio.example';
 $ordinarySpec['document_root'] = $symWeb;
 $r = probe($ordinarySpec);
 ok($r['http'] === 503, 'production accepts nonexistent ordinary storage outside the public root');
+ok(is_dir($ordinaryOutside), 'ordinary external storage directory is actually created');
 foreach ((array) glob($ordinaryOutside . DIRECTORY_SEPARATOR . '*.json') as $file) { @unlink($file); }
 @rmdir($ordinaryOutside);
 @rmdir(dirname($ordinaryOutside));

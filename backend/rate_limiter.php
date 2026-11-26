@@ -85,10 +85,15 @@ function rl_storage_dir(): string {
     }
 
     foreach ($candidates as $dir) {
-        if ($production && !rl_prevalidate_prod_dir($dir, $publicRoot)) {
-            return ''; // reason already logged — fail closed
+        $dirToCreate = $dir;
+        if ($production) {
+            if (!rl_prevalidate_prod_dir($dir, $publicRoot, $dirToCreate)) {
+                return ''; // reason already logged — fail closed
+            }
         }
-        if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+        // Create at the verified resolved location. In particular, mkdir()
+        // cannot reliably create through a dangling symlink on all platforms.
+        if (!is_dir($dir) && !@mkdir($dirToCreate, 0700, true) && !is_dir($dir)) {
             error_log('[RateLimiter] cannot create storage directory: ' . $dir);
             continue;
         }
@@ -119,10 +124,10 @@ function rl_storage_dir(): string {
  * do not exist yet). Keeps a leading root prefix intact.
  */
 function rl_normalize_path(string $path): string {
-    $isAbsolute = (bool) preg_match('~^([A-Za-z]:)?[\\/]~', $path);
+    $isAbsolute = (bool) preg_match('~^([A-Za-z]:)?[\\\\/]~', $path);
     $prefix = '';
     if ($isAbsolute) {
-        if (preg_match('~^[A-Za-z]:[\\/]~', $path)) {
+        if (preg_match('~^[A-Za-z]:[\\\\/]~', $path)) {
             $prefix = substr($path, 0, 2);
             $path = substr($path, 2);
         } else {
@@ -131,7 +136,7 @@ function rl_normalize_path(string $path): string {
         }
     }
     $out = [];
-    foreach (preg_split('~[\\/]+~', $path) as $seg) {
+    foreach (preg_split('~[\\\\/]+~', $path) as $seg) {
         if ($seg === '' || $seg === '.') { continue; }
         if ($seg === '..') {
             if ($out !== [] && end($out) !== '..') { array_pop($out); }
@@ -152,7 +157,7 @@ function rl_normalize_path(string $path): string {
  * ancestor resolves inside the public web root. Returns false (and logs)
  * when the path cannot be verified — callers fail closed.
  */
-function rl_prevalidate_prod_dir(string $dir, string $publicRoot): bool {
+function rl_prevalidate_prod_dir(string $dir, string $publicRoot, ?string &$resolvedPath = null): bool {
     $norm = rl_normalize_path($dir);
     $resolved = rl_resolve_path_symlinks($norm);
     if ($resolved === null) {
@@ -163,6 +168,7 @@ function rl_prevalidate_prod_dir(string $dir, string $publicRoot): bool {
         error_log('[RateLimiter] RATE_LIMIT_DIR resolves inside the public web root');
         return false;
     }
+    $resolvedPath = $resolved;
     return true;
 }
 
@@ -176,7 +182,12 @@ function rl_resolve_path_symlinks(string $path): ?string {
     $path = rl_normalize_path($path);
     for ($links = 0; $links < 40; $links++) {
         $parts = preg_split('~[\\\\/]~', $path, -1, PREG_SPLIT_NO_EMPTY);
-        $prefix = preg_match('~^[A-Za-z]:[\\\\/]~', $path, $m) ? substr($m[0], 0, 2) . DIRECTORY_SEPARATOR : DIRECTORY_SEPARATOR;
+        $isDrivePath = (bool) preg_match('~^[A-Za-z]:[\\\\/]~', $path, $m);
+        $prefix = $isDrivePath ? substr($m[0], 0, 2) . DIRECTORY_SEPARATOR : DIRECTORY_SEPARATOR;
+        if ($isDrivePath && isset($parts[0]) && strcasecmp($parts[0], substr($prefix, 0, 2)) === 0) {
+            array_shift($parts);
+            $parts = array_values($parts);
+        }
         $current = $prefix;
         $restarted = false;
         foreach ($parts as $i => $part) {
